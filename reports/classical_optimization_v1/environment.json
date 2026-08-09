@@ -1,0 +1,19 @@
+{
+  "development_membership_sha256": "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f",
+  "locked_test_accessed": false,
+  "new_competitive_fits": 117,
+  "failed_competitive_fits": 0,
+  "reused_text_ablation_evaluations": 9,
+  "peak_memory": "unavailable; no reliable sandbox-compatible peak RSS measurement",
+  "optimization_config_sha256": "089f7e6446648fbb67d77408f128ea69cee0928cd2d4b60a791b1eefcc5a40fd",
+  "packages": {
+    "numpy": "2.5.2",
+    "pyarrow": "21.0.0",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.18.0"
+  },
+  "platform": "macOS-26.6.1-arm64-arm-64bit",
+  "protocol_sha256": "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda",
+  "python": "3.12.13",
+  "runtime_seconds": 9997.315370916
+}

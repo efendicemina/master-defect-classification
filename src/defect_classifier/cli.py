@@ -13,6 +13,7 @@ from pathlib import Path
 
 from defect_classifier.catalogue import CatalogueError, load_catalogue
 from defect_classifier.classical_benchmark import BenchmarkError, run_classical_benchmark
+from defect_classifier.classical_optimization import run_classical_optimization
 from defect_classifier.config import ConfigurationError, resolve_data_root
 from defect_classifier.cv_manifests import CvManifestError, materialize_frozen_cv_manifests
 from defect_classifier.dataset_audits import AuditError, run_audit
@@ -88,6 +89,29 @@ def build_parser() -> argparse.ArgumentParser:
     benchmark.add_argument("--stage", choices=("all", "smoke", "core"), default="all")
     benchmark.add_argument("--task", choices=("S6", "S3", "S2"))
     benchmark.add_argument("--no-resume", action="store_true")
+    optimize = subparsers.add_parser(
+        "run-classical-optimization", help="run development-only Phase A2 optimization"
+    )
+    optimize.add_argument("--protocol", type=Path, help="override configs/protocol_v1.toml")
+    optimize.add_argument("--config", type=Path, help="override optimization config")
+    optimize.add_argument(
+        "--development-dir", type=Path, default=Path("data/processed/protocol_v1/development")
+    )
+    optimize.add_argument(
+        "--manifest-dir", type=Path, default=Path("data/processed/protocol_v1/cv_manifests")
+    )
+    optimize.add_argument("--protocol-report-dir", type=Path, default=Path("reports/protocol_v1"))
+    optimize.add_argument(
+        "--a1-report-dir", type=Path, default=Path("reports/classical_benchmark_v1")
+    )
+    optimize.add_argument(
+        "--report-dir", type=Path, default=Path("reports/classical_optimization_v1")
+    )
+    optimize.add_argument(
+        "--stage", choices=("all", "smoke", "a2.1", "a2.2", "a2.3"), default="all"
+    )
+    optimize.add_argument("--task", choices=("S6", "S3", "S2"))
+    optimize.add_argument("--no-resume", action="store_true")
     return parser
 
 
@@ -95,6 +119,28 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     print(f"Python: {platform.python_version()} ({sys.executable})")
     print(f"Platform: {platform.platform()}")
+    if args.command == "run-classical-optimization":
+        try:
+            protocol = load_protocol(args.protocol)
+            result = run_classical_optimization(
+                args.development_dir.resolve(),
+                args.manifest_dir.resolve(),
+                args.protocol_report_dir.resolve(),
+                args.a1_report_dir.resolve(),
+                args.report_dir.resolve(),
+                protocol,
+                config_path=args.config,
+                stage=args.stage,
+                task_filter=args.task,
+                resume=not args.no_resume,
+            )
+        except (ProtocolError, BenchmarkError, OSError, KeyError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(f"Successful new competitive fits: {result.get('successful', 0)}")
+        print(f"Failed new competitive fits: {result.get('failed', 0)}")
+        print(f"Runtime: {result['runtime_seconds']:.3f} seconds")
+        return 0
     if args.command == "classical-benchmark":
         try:
             protocol = load_protocol(args.protocol)

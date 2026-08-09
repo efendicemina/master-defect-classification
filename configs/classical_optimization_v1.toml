@@ -1,0 +1,122 @@
+optimization_id = "classical-optimization-v1"
+seed = 20260809
+c_grid = [0.25, 0.50, 1.00, 2.00, 4.00]
+text_views = ["SUMMARY_DESCRIPTION", "SUMMARY_ONLY", "DESCRIPTION_ONLY"]
+
+[models]
+logreg_solver = "liblinear"
+multiclass_logreg_solver = "lbfgs"
+logreg_max_iter = 1000
+linearsvc_max_iter = 5000
+class_weight = "balanced"
+
+[fixed_tfidf]
+sublinear_tf = true
+lowercase = true
+
+[winners.S6]
+classifier = "LINEARSVC"
+representation = "CHAR"
+a1_mean_macro_f1 = 0.25963127388862683
+a1_fold_macro_f1 = [0.2440066780, 0.2612991552, 0.2735879885]
+
+[winners.S3]
+classifier = "LOGREG"
+representation = "WORD"
+a1_mean_macro_f1 = 0.4618888223809065
+a1_fold_macro_f1 = [0.4476406939, 0.4686724109, 0.4693533624]
+
+[winners.S2]
+classifier = "LOGREG"
+representation = "WORD_CHAR"
+a1_mean_macro_f1 = 0.6272658824835772
+a1_fold_macro_f1 = [0.6174933218, 0.6323028491, 0.6320014766]
+
+[[representations.S6]]
+id = "S6-R1"
+representation = "CHAR"
+char = { analyzer = "char_wb", ngram_min = 3, ngram_max = 5, min_df = 2, max_features = 150000 }
+[[representations.S6]]
+id = "S6-R2"
+representation = "CHAR"
+char = { analyzer = "char_wb", ngram_min = 3, ngram_max = 6, min_df = 2, max_features = 150000 }
+[[representations.S6]]
+id = "S6-R3"
+representation = "CHAR"
+char = { analyzer = "char_wb", ngram_min = 2, ngram_max = 5, min_df = 2, max_features = 150000 }
+[[representations.S6]]
+id = "S6-R4"
+representation = "CHAR"
+char = { analyzer = "char_wb", ngram_min = 3, ngram_max = 5, min_df = 5, max_features = 150000 }
+[[representations.S6]]
+id = "S6-R5"
+representation = "CHAR"
+char = { analyzer = "char_wb", ngram_min = 3, ngram_max = 5, min_df = 2, max_features = 250000 }
+[[representations.S6]]
+id = "S6-R6"
+representation = "CHAR"
+char = { analyzer = "char_wb", ngram_min = 3, ngram_max = 6, min_df = 2, max_features = 250000 }
+
+[[representations.S3]]
+id = "S3-R1"
+representation = "WORD"
+word = { analyzer = "word", ngram_min = 1, ngram_max = 2, min_df = 2, max_features = 150000 }
+[[representations.S3]]
+id = "S3-R2"
+representation = "WORD"
+word = { analyzer = "word", ngram_min = 1, ngram_max = 1, min_df = 2, max_features = 150000 }
+[[representations.S3]]
+id = "S3-R3"
+representation = "WORD"
+word = { analyzer = "word", ngram_min = 1, ngram_max = 3, min_df = 2, max_features = 150000 }
+[[representations.S3]]
+id = "S3-R4"
+representation = "WORD"
+word = { analyzer = "word", ngram_min = 1, ngram_max = 2, min_df = 5, max_features = 150000 }
+[[representations.S3]]
+id = "S3-R5"
+representation = "WORD"
+word = { analyzer = "word", ngram_min = 1, ngram_max = 2, min_df = 2, max_features = 250000 }
+[[representations.S3]]
+id = "S3-R6"
+representation = "WORD"
+word = { analyzer = "word", ngram_min = 1, ngram_max = 3, min_df = 2, max_features = 250000 }
+
+[[representations.S2]]
+id = "S2-R1"
+representation = "WORD_CHAR"
+word = { analyzer = "word", ngram_min = 1, ngram_max = 2, min_df = 2, max_features = 150000 }
+char = { analyzer = "char_wb", ngram_min = 3, ngram_max = 5, min_df = 2, max_features = 150000 }
+[[representations.S2]]
+id = "S2-R2"
+representation = "WORD_CHAR"
+word = { analyzer = "word", ngram_min = 1, ngram_max = 2, min_df = 2, max_features = 200000 }
+char = { analyzer = "char_wb", ngram_min = 3, ngram_max = 5, min_df = 2, max_features = 200000 }
+[[representations.S2]]
+id = "S2-R3"
+representation = "WORD_CHAR"
+word = { analyzer = "word", ngram_min = 1, ngram_max = 2, min_df = 2, max_features = 250000 }
+char = { analyzer = "char_wb", ngram_min = 3, ngram_max = 5, min_df = 2, max_features = 250000 }
+[[representations.S2]]
+id = "S2-R4"
+representation = "WORD_CHAR"
+word = { analyzer = "word", ngram_min = 1, ngram_max = 3, min_df = 2, max_features = 150000 }
+char = { analyzer = "char_wb", ngram_min = 3, ngram_max = 5, min_df = 2, max_features = 150000 }
+[[representations.S2]]
+id = "S2-R5"
+representation = "WORD_CHAR"
+word = { analyzer = "word", ngram_min = 1, ngram_max = 2, min_df = 2, max_features = 150000 }
+char = { analyzer = "char_wb", ngram_min = 3, ngram_max = 6, min_df = 2, max_features = 150000 }
+[[representations.S2]]
+id = "S2-R6"
+representation = "WORD_CHAR"
+word = { analyzer = "word", ngram_min = 1, ngram_max = 2, min_df = 2, max_features = 150000 }
+char = { analyzer = "char_wb", ngram_min = 3, ngram_max = 5, min_df = 2, max_features = 250000 }
+
+[smoke]
+task = "S6"
+fold = 1
+c = 1.0
+max_training_rows = 2000
+max_validation_rows = 1000
+max_features = 5000

@@ -39,6 +39,8 @@ class DevelopmentRow:
     stable_id: str
     text: str
     targets: dict[str, str]
+    summary: str = ""
+    description: str = ""
 
 
 def default_benchmark_config_path() -> Path:
@@ -70,7 +72,16 @@ def _load_development_rows(development_dir: Path) -> dict[str, DevelopmentRow]:
     import pyarrow.parquet as pq
 
     rows = {}
-    columns = ["source_project", "issue_id", "text_combined", "target_s6", "target_s3", "target_s2"]
+    columns = [
+        "source_project",
+        "issue_id",
+        "summary",
+        "description",
+        "text_combined",
+        "target_s6",
+        "target_s3",
+        "target_s2",
+    ]
     for path in sorted(development_dir.glob("*.parquet")):
         for record in pq.read_table(path, columns=columns).to_pylist():
             stable_id = f"{record['source_project']}:{record['issue_id']}"
@@ -84,6 +95,8 @@ def _load_development_rows(development_dir: Path) -> dict[str, DevelopmentRow]:
                     "S3": record["target_s3"],
                     "S2": record["target_s2"],
                 },
+                summary=record["summary"],
+                description=record["description"],
             )
     return rows
 
