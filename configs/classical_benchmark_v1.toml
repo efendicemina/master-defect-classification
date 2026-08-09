@@ -1,0 +1,44 @@
+benchmark_id = "classical-benchmark-v1"
+seed = 20260809
+
+[word]
+analyzer = "word"
+ngram_min = 1
+ngram_max = 2
+min_df = 2
+sublinear_tf = true
+lowercase = true
+max_features = 150000
+
+[char]
+analyzer = "char_wb"
+ngram_min = 3
+ngram_max = 5
+min_df = 2
+sublinear_tf = true
+lowercase = true
+max_features = 150000
+
+[word_char]
+word_max_features = 75000
+char_max_features = 75000
+
+[models]
+c = 1.0
+logreg_solver = "liblinear"
+logreg_max_iter = 1000
+linearsvc_max_iter = 5000
+
+[dummy]
+strategies = ["most_frequent", "stratified"]
+
+[smoke]
+task = "S3"
+fold = 1
+representation = "WORD"
+classifier = "LINEARSVC"
+class_weight = "NONE"
+max_training_rows = 2000
+max_validation_rows = 1000
+max_features = 5000
+

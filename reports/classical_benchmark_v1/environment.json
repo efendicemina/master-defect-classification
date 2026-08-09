@@ -1,0 +1,84 @@
+{
+  "benchmark_config_sha256": "27e29e4d98984784b26e81cb4dcdf781e77b0b926ab9b9ec7ee3b69a114ea1d8",
+  "cumulative_execution_runtime_seconds": 6479.394,
+  "development_membership_sha256": "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f",
+  "engineering_adjustments": {
+    "multiclass_logistic_regression_solver": "lbfgs because scikit-learn 1.8 no longer supports multiclass liblinear"
+  },
+  "locked_test_accessed": false,
+  "peak_memory": "unavailable: sandboxed macOS time could not query kern.clockrate",
+  "packages": {
+    "numpy": "2.5.2",
+    "pyarrow": "21.0.0",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.18.0"
+  },
+  "platform": "macOS-26.6.1-arm64-arm-64bit",
+  "protocol_sha256": "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda",
+  "python": "3.12.13",
+  "random_seed": 20260809,
+  "stage0": {
+    "benchmark_config_sha256": "27e29e4d98984784b26e81cb4dcdf781e77b0b926ab9b9ec7ee3b69a114ea1d8",
+    "class_weight": "NONE",
+    "classifier": "LINEARSVC",
+    "development_membership_sha256": "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f",
+    "experiment_id": "79d8919f955e408ef206",
+    "feature_count": 5000,
+    "fit_runtime_seconds": 0.04282595800032141,
+    "fold": 1,
+    "metrics": {
+      "accuracy": 0.677,
+      "balanced_accuracy": 0.39197826781719397,
+      "confusion_matrix": [
+        [
+          95,
+          203,
+          0
+        ],
+        [
+          85,
+          582,
+          12
+        ],
+        [
+          0,
+          23,
+          0
+        ]
+      ],
+      "macro_f1": 0.39342455628932854,
+      "per_class": {
+        "HIGH": {
+          "f1": 0.39748953974895396,
+          "precision": 0.5277777777777778,
+          "recall": 0.3187919463087248,
+          "support": 298
+        },
+        "LOW": {
+          "f1": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "support": 23
+        },
+        "MEDIUM": {
+          "f1": 0.7827841291190316,
+          "precision": 0.7202970297029703,
+          "recall": 0.8571428571428571,
+          "support": 679
+        }
+      },
+      "weighted_f1": 0.6499623065170107
+    },
+    "prediction_runtime_seconds": 0.00048012499973992817,
+    "protocol_sha256": "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda",
+    "random_seed": 20260809,
+    "representation": "WORD",
+    "stage": "ENGINEERING_ONLY",
+    "status": "SUCCESS",
+    "task": "S3",
+    "training_rows": 2000,
+    "validation_rows": 1000,
+    "warnings": []
+  },
+  "total_runtime_seconds": 3302.9427992090023
+}

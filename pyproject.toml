@@ -12,6 +12,7 @@ license = { text = "All rights reserved" }
 authors = [{ name = "Emina Efendic Trapo" }]
 dependencies = [
   "pyarrow>=19,<22",
+  "scikit-learn>=1.7,<1.9",
 ]
 
 [project.optional-dependencies]

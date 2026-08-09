@@ -55,3 +55,4 @@ temp/
 # Restartable forensic-audit working state (final reports remain tracked)
 reports/dataset_audit/.work/
 reports/protocol_v1/.work/
+reports/classical_benchmark_v1/.work/

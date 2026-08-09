@@ -12,6 +12,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from defect_classifier.catalogue import CatalogueError, load_catalogue
+from defect_classifier.classical_benchmark import BenchmarkError, run_classical_benchmark
 from defect_classifier.config import ConfigurationError, resolve_data_root
 from defect_classifier.cv_manifests import CvManifestError, materialize_frozen_cv_manifests
 from defect_classifier.dataset_audits import AuditError, run_audit
@@ -69,6 +70,24 @@ def build_parser() -> argparse.ArgumentParser:
         "--manifest-dir", type=Path, default=Path("data/processed/protocol_v1/cv_manifests")
     )
     materialize.add_argument("--report-dir", type=Path, default=Path("reports/protocol_v1"))
+    benchmark = subparsers.add_parser(
+        "classical-benchmark", help="run the development-only Phase A1 classical benchmark"
+    )
+    benchmark.add_argument("--protocol", type=Path, help="override configs/protocol_v1.toml")
+    benchmark.add_argument("--config", type=Path, help="override classical benchmark config")
+    benchmark.add_argument(
+        "--development-dir", type=Path, default=Path("data/processed/protocol_v1/development")
+    )
+    benchmark.add_argument(
+        "--manifest-dir", type=Path, default=Path("data/processed/protocol_v1/cv_manifests")
+    )
+    benchmark.add_argument("--protocol-report-dir", type=Path, default=Path("reports/protocol_v1"))
+    benchmark.add_argument(
+        "--report-dir", type=Path, default=Path("reports/classical_benchmark_v1")
+    )
+    benchmark.add_argument("--stage", choices=("all", "smoke", "core"), default="all")
+    benchmark.add_argument("--task", choices=("S6", "S3", "S2"))
+    benchmark.add_argument("--no-resume", action="store_true")
     return parser
 
 
@@ -76,6 +95,28 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     print(f"Python: {platform.python_version()} ({sys.executable})")
     print(f"Platform: {platform.platform()}")
+    if args.command == "classical-benchmark":
+        try:
+            protocol = load_protocol(args.protocol)
+            result = run_classical_benchmark(
+                args.development_dir.resolve(),
+                args.manifest_dir.resolve(),
+                args.protocol_report_dir.resolve(),
+                args.report_dir.resolve(),
+                protocol,
+                benchmark_config_path=args.config,
+                stage=args.stage,
+                task_filter=args.task,
+                resume=not args.no_resume,
+            )
+        except (ProtocolError, BenchmarkError, OSError, KeyError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(f"Stage 0: {result['stage0'].get('status', 'SKIPPED')}")
+        print(f"Successful competitive fits: {result.get('successful', 0)}")
+        print(f"Failed competitive fits: {result.get('failed', 0)}")
+        print(f"Runtime: {result['total_runtime_seconds']:.3f} seconds")
+        return 0
     if args.command == "materialize-cv-manifests":
         try:
             protocol = load_protocol(args.protocol)
