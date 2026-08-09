@@ -70,6 +70,14 @@ separated beneath `data/locked/protocol_v1/`. Normal research code must use deve
 only. Locked-test reads require the explicit protocol guard and are reserved for a future,
 separate final-evaluation workflow.
 
+Frozen development CV membership is persisted during preparation under
+`data/processed/protocol_v1/cv_manifests/`. To repair an older protocol-v1 build that predates
+those manifests without changing any frozen fingerprint, run:
+
+```bash
+defect-classifier materialize-cv-manifests
+```
+
 ## Current status
 
 The repository now provides the forensic audit, frozen protocol v1, deterministic streaming

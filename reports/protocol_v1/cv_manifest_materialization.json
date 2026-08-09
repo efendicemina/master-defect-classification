@@ -1,0 +1,61 @@
+{
+  "chronology_checks": 27,
+  "count_rows_validated": 54,
+  "fingerprints_matched": 12,
+  "integrity_checks": [
+    {
+      "chronology": "PASS",
+      "cv_final_locked_overlap": 0,
+      "duplicate_component_overlap": 0,
+      "family": "within_project",
+      "fold": 1,
+      "train_validation_overlap": 0
+    },
+    {
+      "chronology": "PASS",
+      "cv_final_locked_overlap": 0,
+      "duplicate_component_overlap": 0,
+      "family": "within_project",
+      "fold": 2,
+      "train_validation_overlap": 0
+    },
+    {
+      "chronology": "PASS",
+      "cv_final_locked_overlap": 0,
+      "duplicate_component_overlap": 0,
+      "family": "within_project",
+      "fold": 3,
+      "train_validation_overlap": 0
+    },
+    {
+      "chronology": "PASS",
+      "cv_final_locked_overlap": 0,
+      "duplicate_component_overlap": 0,
+      "family": "pooled",
+      "fold": 1,
+      "train_validation_overlap": 0
+    },
+    {
+      "chronology": "PASS",
+      "cv_final_locked_overlap": 0,
+      "duplicate_component_overlap": 0,
+      "family": "pooled",
+      "fold": 2,
+      "train_validation_overlap": 0
+    },
+    {
+      "chronology": "PASS",
+      "cv_final_locked_overlap": 0,
+      "duplicate_component_overlap": 0,
+      "family": "pooled",
+      "fold": 3,
+      "train_validation_overlap": 0
+    }
+  ],
+  "manifest_file_count": 12,
+  "manifest_record_count": 923548,
+  "platform": "macOS-26.6.1-arm64-arm-64bit",
+  "protocol_sha256": "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda",
+  "python": "3.12.13",
+  "runtime_seconds": 26.639
+}

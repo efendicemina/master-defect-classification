@@ -712,6 +712,18 @@ def prepare_protocol_v1(
             destination.parent.mkdir(parents=True, exist_ok=True)
             os.replace(source, destination)
 
+    # Persist the exact memberships produced above so modelling never reconstructs folds.
+    from defect_classifier.cv_manifests import (
+        memberships_from_fold_summaries,
+        persist_cv_memberships,
+    )
+
+    persist_cv_memberships(
+        processed_dir / "cv_manifests",
+        memberships_from_fold_summaries(cv_sizes),
+        all_rows,
+    )
+
     elapsed = time.monotonic() - started
     _write_protocol_reports(
         report_dir,

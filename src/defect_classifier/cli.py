@@ -13,6 +13,7 @@ from pathlib import Path
 
 from defect_classifier.catalogue import CatalogueError, load_catalogue
 from defect_classifier.config import ConfigurationError, resolve_data_root
+from defect_classifier.cv_manifests import CvManifestError, materialize_frozen_cv_manifests
 from defect_classifier.dataset_audits import AuditError, run_audit
 from defect_classifier.preparation import PreparationError, prepare_protocol_v1
 from defect_classifier.protocol import ProtocolError, load_protocol
@@ -56,6 +57,18 @@ def build_parser() -> argparse.ArgumentParser:
     prepare.add_argument("--locked-dir", type=Path, default=Path("data/locked/protocol_v1"))
     prepare.add_argument("--report-dir", type=Path, default=Path("reports/protocol_v1"))
     prepare.add_argument("--progress-every", type=int, default=10_000, metavar="ROWS")
+    materialize = subparsers.add_parser(
+        "materialize-cv-manifests",
+        help="persist already-frozen protocol-v1 development CV memberships",
+    )
+    materialize.add_argument("--protocol", type=Path, help="override configs/protocol_v1.toml")
+    materialize.add_argument(
+        "--project-dir", type=Path, default=Path("data/processed/protocol_v1/projects")
+    )
+    materialize.add_argument(
+        "--manifest-dir", type=Path, default=Path("data/processed/protocol_v1/cv_manifests")
+    )
+    materialize.add_argument("--report-dir", type=Path, default=Path("reports/protocol_v1"))
     return parser
 
 
@@ -63,6 +76,27 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     print(f"Python: {platform.python_version()} ({sys.executable})")
     print(f"Platform: {platform.platform()}")
+    if args.command == "materialize-cv-manifests":
+        try:
+            protocol = load_protocol(args.protocol)
+            result = materialize_frozen_cv_manifests(
+                args.project_dir.resolve(),
+                args.manifest_dir.resolve(),
+                args.report_dir.resolve(),
+                protocol,
+            )
+        except (ProtocolError, CvManifestError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        peak_mib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024**2
+        if sys.platform != "darwin":
+            peak_mib *= 1024
+        print(f"Manifest files: {result['manifest_file_count']}")
+        print(f"Manifest records: {result['manifest_record_count']}")
+        print(f"Fingerprints matched: {result['fingerprints_matched']}/12")
+        print(f"Runtime: {result['runtime_seconds']:.3f} seconds")
+        print(f"Peak process RSS: {peak_mib:.2f} MiB")
+        return 0
     try:
         root = resolve_data_root(args.data_root)
         catalogue = load_catalogue(args.catalogue)
