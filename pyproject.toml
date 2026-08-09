@@ -10,7 +10,9 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "All rights reserved" }
 authors = [{ name = "Emina Efendic Trapo" }]
-dependencies = []
+dependencies = [
+  "pyarrow>=19,<22",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -34,4 +36,3 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
-

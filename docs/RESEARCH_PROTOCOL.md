@@ -32,12 +32,13 @@ configs, software versions, dataset identity, and source revision must be record
 
 ### Final locked test evaluation
 
-A final chronological test set will be defined and frozen in a later, separately reviewed task.
-It does not exist yet. Once frozen, its labels, predictions, metrics, and error cases are locked
-away from routine development workflows. Locked-test results must not guide hyperparameter,
-feature, preprocessing, target-mapping, threshold, or model-family decisions. The architecture
-should require an explicit final-evaluation action and write results separately from development
-reports. Repeated evaluation is not a substitute for validation and must be auditable.
+Protocol v1 and its chronological membership are frozen in `docs/FROZEN_PROTOCOL_V1.md` and
+`configs/protocol_v1.toml`. Locked-test text-bearing artifacts are physically separate from
+development artifacts and guarded from normal research workflows. Their labels, predictions,
+metrics, and error cases remain unavailable for model selection. Locked-test results must not
+guide hyperparameter, feature, preprocessing, target-mapping, threshold, or model-family
+decisions. A future explicit final-evaluation action must write results separately and audibly;
+repeated evaluation is not a substitute for validation.
 
 ## Leakage controls
 
@@ -52,4 +53,3 @@ Every experiment should be recoverable from committed configuration plus an exte
 manifest. Record deterministic seeds, environment and dependency versions, code revision, input
 identity, split identity, command/config, metrics, and artifact locations. Small metadata and
 reports belong in Git; large derived data and models do not.
-

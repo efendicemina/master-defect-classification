@@ -56,11 +56,26 @@ Completed project aggregates are cached under the ignored
 project. The audit preserves raw severity labels and does not define eligibility, mappings,
 preprocessing, splits, or models.
 
+## Frozen protocol-v1 preparation
+
+After reviewing `docs/FROZEN_PROTOCOL_V1.md`, build ignored Parquet artifacts and safe aggregate
+split reports with:
+
+```bash
+defect-classifier prepare-data
+```
+
+Development data is written beneath `data/processed/protocol_v1/`; locked-test data is physically
+separated beneath `data/locked/protocol_v1/`. Normal research code must use development artifacts
+only. Locked-test reads require the explicit protocol guard and are reserved for a future,
+separate final-evaluation workflow.
+
 ## Current status
 
-The repository currently provides configuration, a canonical project catalogue, path and
-environment validation, deterministic seed setup, a CLI, tests, and protocol documentation.
-Classical reproduction and advanced modelling are planned but not yet implemented.
+The repository now provides the forensic audit, frozen protocol v1, deterministic streaming
+Parquet preparation, chronology-aware development/locked-test membership, duplicate-leakage
+protection, temporal CV manifests, fingerprints, access controls, and synthetic tests. No model
+has been trained. Classical reproduction and advanced modelling remain future phases.
 
 ## Reproducibility principles
 

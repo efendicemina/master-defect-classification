@@ -1,0 +1,10 @@
+project,raw_rows,eligible_rows,excluded_enhancement_rows,excluded_missing_text_rows,excluded_other_rows,malformed_trailing_rows_retained,development_candidate_rows,locked_test_candidate_rows,locked_removed_exact_text,locked_removed_explicit_dupe_link,final_development_rows,final_locked_test_rows,chronology_boundary_index
+BIRT,23308,21132,2176,0,0,0,16905,4227,1,53,16905,4173,16905
+MYLYN,13993,9673,4320,0,0,0,7738,1935,8,38,7738,1889,7738
+CDT,22371,19705,2666,0,0,0,15764,3941,0,107,15764,3834,15764
+EQUINOX,14559,13123,1436,0,0,1,10498,2625,2,41,10498,2582,10498
+JDT,63266,53076,10190,0,0,0,42460,10616,1,274,42460,10341,42460
+PDE,17639,15593,2046,0,0,3,12474,3119,3,37,12474,3079,12474
+PAPYRUS,13253,10910,2343,0,0,0,8728,2182,0,10,8728,2172,8728
+PLATFORM,122496,106803,15693,0,0,0,85442,21361,15,557,85442,20789,85442
+TPTP,10579,9458,1121,0,0,0,7566,1892,27,49,7566,1816,7566

@@ -1,0 +1,127 @@
+protocol_id = "eclipse-severity-v1"
+version = 1
+seed = 20260809
+
+[dataset_assertions]
+expected_raw_rows = 301464
+expected_eligible_rows_before_duplicate_overlap = 259473
+
+[raw_schema]
+delimiter = ","
+encoding = "utf-8-sig"
+columns = [
+  "Issue URL", "ID", "Alias", "Classification", "Component", "Product", "Version",
+  "Platform", "Op sys", "Status", "Resolution", "Depends on", "Dupe of", "Blocks",
+  "Groups", "Flags", "Severity", "Priority", "Deadline", "Target Milestone", "Creator",
+  "Creator Detail", "Creation time", "Assigned to", "Assigned to detail", "CC",
+  "CC detail", "Is CC accessible", "Is confirmed", "Is open", "Is creator accessible",
+  "Summary", "Description", "URL", "Whiteboard", "Keywords", "See also",
+  "Last change time", "QA contact", "History/Activity Log", "Comments", "Attachments",
+]
+
+[targets]
+accepted_raw_labels = ["blocker", "critical", "major", "normal", "minor", "trivial"]
+excluded_raw_labels = ["enhancement"]
+
+[targets.s6]
+order = ["blocker", "critical", "major", "normal", "minor", "trivial"]
+blocker = "blocker"
+critical = "critical"
+major = "major"
+normal = "normal"
+minor = "minor"
+trivial = "trivial"
+
+[targets.s3]
+order = ["HIGH", "MEDIUM", "LOW"]
+blocker = "HIGH"
+critical = "HIGH"
+major = "HIGH"
+normal = "MEDIUM"
+minor = "LOW"
+trivial = "LOW"
+
+[targets.s2]
+order = ["HIGH_IMPACT", "LOWER_IMPACT"]
+blocker = "HIGH_IMPACT"
+critical = "HIGH_IMPACT"
+major = "HIGH_IMPACT"
+normal = "LOWER_IMPACT"
+minor = "LOWER_IMPACT"
+trivial = "LOWER_IMPACT"
+
+[text]
+fields = ["Summary", "Description"]
+unicode_normalization = "NFC"
+line_endings = "LF"
+separator = "\n\n"
+require_at_least_one_nonblank = true
+
+[split]
+development_ratio = 0.8
+assignment = "per_project_chronological_floor"
+timestamp_field = "Creation time"
+tie_breaker = "numeric_issue_id_then_lexical"
+locked_candidate_overlap_action = "exclude_future"
+
+[temporal_cv]
+fold_count = 3
+scheme = "four_equal_position_blocks_expanding_window"
+shuffle = false
+validation_overlap_action = "exclude_future"
+
+[duplicates]
+exact_text_fields = ["Summary", "Description"]
+exact_unicode_normalization = "NFC"
+exact_line_endings = "LF"
+exact_separator = "NUL"
+explicit_equivalence_field = "Dupe of"
+non_equivalence_fields = ["Depends on", "Blocks", "See also"]
+scope = "cross_project"
+training_duplicates_retained = true
+
+[features.primary]
+allowed = ["Summary", "Description"]
+forbidden = [
+  "Severity",
+  "Priority",
+  "Status",
+  "Resolution",
+  "Last change time",
+  "Assigned to",
+  "Comments",
+  "History/Activity Log",
+  "Attachments",
+  "Dupe of",
+  "Depends on",
+  "Blocks",
+  "See also",
+  "Product",
+  "Component",
+  "source_project",
+]
+
+[evaluation]
+primary_metric = "macro_f1"
+secondary_metrics = [
+  "balanced_accuracy",
+  "accuracy",
+  "weighted_f1",
+  "per_class_precision",
+  "per_class_recall",
+  "per_class_f1",
+  "per_class_support",
+  "confusion_matrix",
+]
+s2_score_metrics = ["high_impact_precision", "high_impact_recall", "high_impact_f1", "pr_auc", "roc_auc"]
+zero_division = 0
+
+[legacy_reproduction]
+s2_minimum_high_impact_precision = 0.30
+reproduction_only = true
+
+[access_control]
+test_set_accessed_for_model_selection = false
+locked_test_model_performance_accessed = false
+unlock_environment_variable = "DEFECT_CLASSIFIER_UNLOCK_LOCKED_TEST"
+unlock_value = "FINAL_EVALUATION_ONLY"

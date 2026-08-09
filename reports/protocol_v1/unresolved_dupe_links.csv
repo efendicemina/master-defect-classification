@@ -1,0 +1,10 @@
+project,reason,count
+BIRT,target_not_eligible_or_external,159
+CDT,target_not_eligible_or_external,171
+EQUINOX,target_not_eligible_or_external,164
+JDT,target_not_eligible_or_external,944
+MYLYN,target_not_eligible_or_external,320
+PAPYRUS,target_not_eligible_or_external,44
+PDE,target_not_eligible_or_external,193
+PLATFORM,target_not_eligible_or_external,1616
+TPTP,target_not_eligible_or_external,95

@@ -1,0 +1,35 @@
+{
+  "cv_membership_sha256": {
+    "pooled_fold_1_training": "e4a6f13463d6897469ec465e9cee881675ef7cbe42bcc1f91c30b7d38b32c51a",
+    "pooled_fold_1_validation": "b66ab6c7203fd5ab7bc3212e17578776dbd89d78f8aa219ebfb48c1d2f2dc258",
+    "pooled_fold_2_training": "4a4bda81c05f114a39e02458417b094a601c7f375e49d75fbb2b0d2b1c8edd09",
+    "pooled_fold_2_validation": "33d647d4151368f92f5d42b14120dcd56eafcadb24d3b09ebac8c5d38fd27bbf",
+    "pooled_fold_3_training": "00a1c00ae15e80f6ff771a4a2f6bd0558f76e45967d8a2e35d5fc8ba2e22288a",
+    "pooled_fold_3_validation": "1072c0c2fbbe3734c0d5a86c2285ccf2ec68df784c89241dc36914c28b6247f4",
+    "within_project_fold_1_training": "e4a6f13463d6897469ec465e9cee881675ef7cbe42bcc1f91c30b7d38b32c51a",
+    "within_project_fold_1_validation": "e1e6f9285372d66483563dd9f5bef8eb3bbc2f90fdc446a6f7287d1bde39f714",
+    "within_project_fold_2_training": "4a4bda81c05f114a39e02458417b094a601c7f375e49d75fbb2b0d2b1c8edd09",
+    "within_project_fold_2_validation": "df6b4b091d34681ec445d3aa0f665ac7bdc7db8ceffe47f6fb8d0e537f404862",
+    "within_project_fold_3_training": "00a1c00ae15e80f6ff771a4a2f6bd0558f76e45967d8a2e35d5fc8ba2e22288a",
+    "within_project_fold_3_validation": "ae490b6fdbc93962a2a32e2ff418d4aa20d99cd053a581b344aa44eebbafe00e"
+  },
+  "development_membership_sha256": "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f",
+  "generated_at_runtime_seconds": 132.12,
+  "locked_test_candidate_membership_sha256": "21d61fdf7a4bd31032fc4d39c16b5c3957489dae5c82f8ed51f3da1044f2cb95",
+  "locked_test_membership_sha256": "c18f2320c896bf2bdcb94d2447ce9a04d17e6923f03b169f29b8174b8a5cf681",
+  "platform": "macOS-26.6.1-arm64-arm-64bit",
+  "processed_dataset_sha256": "9c08c94e1ca1935f88a06f2a09436fc55b89cac9334f0bcfcee57cd46bd17b1d",
+  "processed_project_artifacts": {
+    "BIRT": "24f56124383e708d517b50eae685193ecac7874c3afc1ba175978f201a09df06",
+    "CDT": "2d8e2caa86349330e50821b7f36c5fcb0936eea47b713aee1f7375e5fd570bda",
+    "EQUINOX": "c9af47eb74c52ebec7dccbf074f934f5ac776d207a8bd50a500d084ec19fe82f",
+    "JDT": "db36b3f6b885172c87a58d65357b2f58b176525ab8050931430a49ad292ddb80",
+    "MYLYN": "3e0feccc9d7f92715ebbfafa1dac13e05ae41266bdc0084363bfae683d47973a",
+    "PAPYRUS": "3740c736eb4c2b396d9e50ad391aeeb927853895048da9812d116cfa8d01fc43",
+    "PDE": "5ec01b27f9bd72bec2f8986e694f2dc89e1940851ddce6ddee991793d29a94b8",
+    "PLATFORM": "273b0c478c50c98d9139af9790976fe07665132d74ee37094261a912b6f39d52",
+    "TPTP": "ee1bacdf57a99a6ad8107e03c4776f03b8719ddd6daf2d0744522f159c08955d"
+  },
+  "protocol_sha256": "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda",
+  "python": "3.12.13"
+}
