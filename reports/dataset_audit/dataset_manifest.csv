@@ -1,0 +1,10 @@
+project,source_relative_path,source_size_bytes,raw_row_count,successfully_parsed_rows,field_audited_rows,malformed_bad_line_count,historical_reference_count,historical_comparison
+BIRT,C_BIRT/BIRT_dataset_issues.csv,2752122706,23308,23308,23308,0,23308,MATCH
+MYLYN,C_mylyn/MYLYN_dataset_issues.csv,816159025,13993,13993,13993,0,13993,MATCH
+CDT,P_CDT/CDT_dataset_issues.csv,3273003984,22371,22371,22371,0,22371,MATCH
+EQUINOX,P_Equinox/Equinox_dataset_issues.csv,2040945111,14559,14559,14559,1,14559,MATCH
+JDT,P_JDT/JDT_dataset_issues.csv,6377569970,63266,63266,63266,0,63266,MATCH
+PDE,P_PDE/PDE_dataset_issues.csv,1332656466,17639,17639,17639,3,17639,MATCH
+PAPYRUS,P_Papyrus/Papyrus_dataset_issues.csv,1003621845,13253,13253,13253,0,13253,MATCH
+PLATFORM,P_Platform/Platform_dataset_issues.csv,15340818646,122496,122496,122496,0,122496,MATCH
+TPTP,P_TPTP/TPTP_dataset_issues.csv,991170529,10579,10579,10579,0,10579,MATCH

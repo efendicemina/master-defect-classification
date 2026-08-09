@@ -42,6 +42,20 @@ missing. A different catalogue can be supplied with `--catalogue PATH` for testi
 The application deliberately does not load `.env` implicitly; export it in the shell or use an
 environment manager of your choice.
 
+## Forensic dataset audit
+
+The restartable audit processes one project at a time with Python's streaming CSV reader and
+writes small aggregate reports without creating a derived dataset:
+
+```bash
+defect-classifier audit-data
+```
+
+Completed project aggregates are cached under the ignored
+`reports/dataset_audit/.work/` directory. Use `--no-resume` to deliberately recompute every
+project. The audit preserves raw severity labels and does not define eligibility, mappings,
+preprocessing, splits, or models.
+
 ## Current status
 
 The repository currently provides configuration, a canonical project catalogue, path and
@@ -57,4 +71,3 @@ uses development data only; the final chronological test set will be locked, and
 must never influence feature, model, or hyperparameter decisions.
 
 See `docs/RESEARCH_PROTOCOL.md` before adding data or modelling code.
-

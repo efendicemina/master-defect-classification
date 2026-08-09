@@ -51,3 +51,5 @@ tmp/
 temp/
 *.log
 
+# Restartable forensic-audit working state (final reports remain tracked)
+reports/dataset_audit/.work/

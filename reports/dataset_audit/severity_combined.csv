@@ -1,0 +1,9 @@
+severity_raw,count,percentage,is_null_or_blank
+blocker,4539,1.50565242,False
+critical,9732,3.22824616,False
+enhancement,41991,13.92902635,False
+major,26337,8.73636653,False
+minor,12059,4.00014595,False
+normal,202442,67.15296022,False
+trivial,4364,1.44760237,False
+,0,0.0,True

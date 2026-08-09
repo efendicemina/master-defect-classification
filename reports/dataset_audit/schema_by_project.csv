@@ -1,0 +1,379 @@
+project,position,column,present
+BIRT,1,Issue URL,True
+BIRT,2,ID,True
+BIRT,3,Alias,True
+BIRT,4,Classification,True
+BIRT,5,Component,True
+BIRT,6,Product,True
+BIRT,7,Version,True
+BIRT,8,Platform,True
+BIRT,9,Op sys,True
+BIRT,10,Status,True
+BIRT,11,Resolution,True
+BIRT,12,Depends on,True
+BIRT,13,Dupe of,True
+BIRT,14,Blocks,True
+BIRT,15,Groups,True
+BIRT,16,Flags,True
+BIRT,17,Severity,True
+BIRT,18,Priority,True
+BIRT,19,Deadline,True
+BIRT,20,Target Milestone,True
+BIRT,21,Creator,True
+BIRT,22,Creator Detail,True
+BIRT,23,Creation time,True
+BIRT,24,Assigned to,True
+BIRT,25,Assigned to detail,True
+BIRT,26,CC,True
+BIRT,27,CC detail,True
+BIRT,28,Is CC accessible,True
+BIRT,29,Is confirmed,True
+BIRT,30,Is open,True
+BIRT,31,Is creator accessible,True
+BIRT,32,Summary,True
+BIRT,33,Description,True
+BIRT,34,URL,True
+BIRT,35,Whiteboard,True
+BIRT,36,Keywords,True
+BIRT,37,See also,True
+BIRT,38,Last change time,True
+BIRT,39,QA contact,True
+BIRT,40,History/Activity Log,True
+BIRT,41,Comments,True
+BIRT,42,Attachments,True
+MYLYN,1,Issue URL,True
+MYLYN,2,ID,True
+MYLYN,3,Alias,True
+MYLYN,4,Classification,True
+MYLYN,5,Component,True
+MYLYN,6,Product,True
+MYLYN,7,Version,True
+MYLYN,8,Platform,True
+MYLYN,9,Op sys,True
+MYLYN,10,Status,True
+MYLYN,11,Resolution,True
+MYLYN,12,Depends on,True
+MYLYN,13,Dupe of,True
+MYLYN,14,Blocks,True
+MYLYN,15,Groups,True
+MYLYN,16,Flags,True
+MYLYN,17,Severity,True
+MYLYN,18,Priority,True
+MYLYN,19,Deadline,True
+MYLYN,20,Target Milestone,True
+MYLYN,21,Creator,True
+MYLYN,22,Creator Detail,True
+MYLYN,23,Creation time,True
+MYLYN,24,Assigned to,True
+MYLYN,25,Assigned to detail,True
+MYLYN,26,CC,True
+MYLYN,27,CC detail,True
+MYLYN,28,Is CC accessible,True
+MYLYN,29,Is confirmed,True
+MYLYN,30,Is open,True
+MYLYN,31,Is creator accessible,True
+MYLYN,32,Summary,True
+MYLYN,33,Description,True
+MYLYN,34,URL,True
+MYLYN,35,Whiteboard,True
+MYLYN,36,Keywords,True
+MYLYN,37,See also,True
+MYLYN,38,Last change time,True
+MYLYN,39,QA contact,True
+MYLYN,40,History/Activity Log,True
+MYLYN,41,Comments,True
+MYLYN,42,Attachments,True
+CDT,1,Issue URL,True
+CDT,2,ID,True
+CDT,3,Alias,True
+CDT,4,Classification,True
+CDT,5,Component,True
+CDT,6,Product,True
+CDT,7,Version,True
+CDT,8,Platform,True
+CDT,9,Op sys,True
+CDT,10,Status,True
+CDT,11,Resolution,True
+CDT,12,Depends on,True
+CDT,13,Dupe of,True
+CDT,14,Blocks,True
+CDT,15,Groups,True
+CDT,16,Flags,True
+CDT,17,Severity,True
+CDT,18,Priority,True
+CDT,19,Deadline,True
+CDT,20,Target Milestone,True
+CDT,21,Creator,True
+CDT,22,Creator Detail,True
+CDT,23,Creation time,True
+CDT,24,Assigned to,True
+CDT,25,Assigned to detail,True
+CDT,26,CC,True
+CDT,27,CC detail,True
+CDT,28,Is CC accessible,True
+CDT,29,Is confirmed,True
+CDT,30,Is open,True
+CDT,31,Is creator accessible,True
+CDT,32,Summary,True
+CDT,33,Description,True
+CDT,34,URL,True
+CDT,35,Whiteboard,True
+CDT,36,Keywords,True
+CDT,37,See also,True
+CDT,38,Last change time,True
+CDT,39,QA contact,True
+CDT,40,History/Activity Log,True
+CDT,41,Comments,True
+CDT,42,Attachments,True
+EQUINOX,1,Issue URL,True
+EQUINOX,2,ID,True
+EQUINOX,3,Alias,True
+EQUINOX,4,Classification,True
+EQUINOX,5,Component,True
+EQUINOX,6,Product,True
+EQUINOX,7,Version,True
+EQUINOX,8,Platform,True
+EQUINOX,9,Op sys,True
+EQUINOX,10,Status,True
+EQUINOX,11,Resolution,True
+EQUINOX,12,Depends on,True
+EQUINOX,13,Dupe of,True
+EQUINOX,14,Blocks,True
+EQUINOX,15,Groups,True
+EQUINOX,16,Flags,True
+EQUINOX,17,Severity,True
+EQUINOX,18,Priority,True
+EQUINOX,19,Deadline,True
+EQUINOX,20,Target Milestone,True
+EQUINOX,21,Creator,True
+EQUINOX,22,Creator Detail,True
+EQUINOX,23,Creation time,True
+EQUINOX,24,Assigned to,True
+EQUINOX,25,Assigned to detail,True
+EQUINOX,26,CC,True
+EQUINOX,27,CC detail,True
+EQUINOX,28,Is CC accessible,True
+EQUINOX,29,Is confirmed,True
+EQUINOX,30,Is open,True
+EQUINOX,31,Is creator accessible,True
+EQUINOX,32,Summary,True
+EQUINOX,33,Description,True
+EQUINOX,34,URL,True
+EQUINOX,35,Whiteboard,True
+EQUINOX,36,Keywords,True
+EQUINOX,37,See also,True
+EQUINOX,38,Last change time,True
+EQUINOX,39,QA contact,True
+EQUINOX,40,History/Activity Log,True
+EQUINOX,41,Comments,True
+EQUINOX,42,Attachments,True
+JDT,1,Issue URL,True
+JDT,2,ID,True
+JDT,3,Alias,True
+JDT,4,Classification,True
+JDT,5,Component,True
+JDT,6,Product,True
+JDT,7,Version,True
+JDT,8,Platform,True
+JDT,9,Op sys,True
+JDT,10,Status,True
+JDT,11,Resolution,True
+JDT,12,Depends on,True
+JDT,13,Dupe of,True
+JDT,14,Blocks,True
+JDT,15,Groups,True
+JDT,16,Flags,True
+JDT,17,Severity,True
+JDT,18,Priority,True
+JDT,19,Deadline,True
+JDT,20,Target Milestone,True
+JDT,21,Creator,True
+JDT,22,Creator Detail,True
+JDT,23,Creation time,True
+JDT,24,Assigned to,True
+JDT,25,Assigned to detail,True
+JDT,26,CC,True
+JDT,27,CC detail,True
+JDT,28,Is CC accessible,True
+JDT,29,Is confirmed,True
+JDT,30,Is open,True
+JDT,31,Is creator accessible,True
+JDT,32,Summary,True
+JDT,33,Description,True
+JDT,34,URL,True
+JDT,35,Whiteboard,True
+JDT,36,Keywords,True
+JDT,37,See also,True
+JDT,38,Last change time,True
+JDT,39,QA contact,True
+JDT,40,History/Activity Log,True
+JDT,41,Comments,True
+JDT,42,Attachments,True
+PDE,1,Issue URL,True
+PDE,2,ID,True
+PDE,3,Alias,True
+PDE,4,Classification,True
+PDE,5,Component,True
+PDE,6,Product,True
+PDE,7,Version,True
+PDE,8,Platform,True
+PDE,9,Op sys,True
+PDE,10,Status,True
+PDE,11,Resolution,True
+PDE,12,Depends on,True
+PDE,13,Dupe of,True
+PDE,14,Blocks,True
+PDE,15,Groups,True
+PDE,16,Flags,True
+PDE,17,Severity,True
+PDE,18,Priority,True
+PDE,19,Deadline,True
+PDE,20,Target Milestone,True
+PDE,21,Creator,True
+PDE,22,Creator Detail,True
+PDE,23,Creation time,True
+PDE,24,Assigned to,True
+PDE,25,Assigned to detail,True
+PDE,26,CC,True
+PDE,27,CC detail,True
+PDE,28,Is CC accessible,True
+PDE,29,Is confirmed,True
+PDE,30,Is open,True
+PDE,31,Is creator accessible,True
+PDE,32,Summary,True
+PDE,33,Description,True
+PDE,34,URL,True
+PDE,35,Whiteboard,True
+PDE,36,Keywords,True
+PDE,37,See also,True
+PDE,38,Last change time,True
+PDE,39,QA contact,True
+PDE,40,History/Activity Log,True
+PDE,41,Comments,True
+PDE,42,Attachments,True
+PAPYRUS,1,Issue URL,True
+PAPYRUS,2,ID,True
+PAPYRUS,3,Alias,True
+PAPYRUS,4,Classification,True
+PAPYRUS,5,Component,True
+PAPYRUS,6,Product,True
+PAPYRUS,7,Version,True
+PAPYRUS,8,Platform,True
+PAPYRUS,9,Op sys,True
+PAPYRUS,10,Status,True
+PAPYRUS,11,Resolution,True
+PAPYRUS,12,Depends on,True
+PAPYRUS,13,Dupe of,True
+PAPYRUS,14,Blocks,True
+PAPYRUS,15,Groups,True
+PAPYRUS,16,Flags,True
+PAPYRUS,17,Severity,True
+PAPYRUS,18,Priority,True
+PAPYRUS,19,Deadline,True
+PAPYRUS,20,Target Milestone,True
+PAPYRUS,21,Creator,True
+PAPYRUS,22,Creator Detail,True
+PAPYRUS,23,Creation time,True
+PAPYRUS,24,Assigned to,True
+PAPYRUS,25,Assigned to detail,True
+PAPYRUS,26,CC,True
+PAPYRUS,27,CC detail,True
+PAPYRUS,28,Is CC accessible,True
+PAPYRUS,29,Is confirmed,True
+PAPYRUS,30,Is open,True
+PAPYRUS,31,Is creator accessible,True
+PAPYRUS,32,Summary,True
+PAPYRUS,33,Description,True
+PAPYRUS,34,URL,True
+PAPYRUS,35,Whiteboard,True
+PAPYRUS,36,Keywords,True
+PAPYRUS,37,See also,True
+PAPYRUS,38,Last change time,True
+PAPYRUS,39,QA contact,True
+PAPYRUS,40,History/Activity Log,True
+PAPYRUS,41,Comments,True
+PAPYRUS,42,Attachments,True
+PLATFORM,1,Issue URL,True
+PLATFORM,2,ID,True
+PLATFORM,3,Alias,True
+PLATFORM,4,Classification,True
+PLATFORM,5,Component,True
+PLATFORM,6,Product,True
+PLATFORM,7,Version,True
+PLATFORM,8,Platform,True
+PLATFORM,9,Op sys,True
+PLATFORM,10,Status,True
+PLATFORM,11,Resolution,True
+PLATFORM,12,Depends on,True
+PLATFORM,13,Dupe of,True
+PLATFORM,14,Blocks,True
+PLATFORM,15,Groups,True
+PLATFORM,16,Flags,True
+PLATFORM,17,Severity,True
+PLATFORM,18,Priority,True
+PLATFORM,19,Deadline,True
+PLATFORM,20,Target Milestone,True
+PLATFORM,21,Creator,True
+PLATFORM,22,Creator Detail,True
+PLATFORM,23,Creation time,True
+PLATFORM,24,Assigned to,True
+PLATFORM,25,Assigned to detail,True
+PLATFORM,26,CC,True
+PLATFORM,27,CC detail,True
+PLATFORM,28,Is CC accessible,True
+PLATFORM,29,Is confirmed,True
+PLATFORM,30,Is open,True
+PLATFORM,31,Is creator accessible,True
+PLATFORM,32,Summary,True
+PLATFORM,33,Description,True
+PLATFORM,34,URL,True
+PLATFORM,35,Whiteboard,True
+PLATFORM,36,Keywords,True
+PLATFORM,37,See also,True
+PLATFORM,38,Last change time,True
+PLATFORM,39,QA contact,True
+PLATFORM,40,History/Activity Log,True
+PLATFORM,41,Comments,True
+PLATFORM,42,Attachments,True
+TPTP,1,Issue URL,True
+TPTP,2,ID,True
+TPTP,3,Alias,True
+TPTP,4,Classification,True
+TPTP,5,Component,True
+TPTP,6,Product,True
+TPTP,7,Version,True
+TPTP,8,Platform,True
+TPTP,9,Op sys,True
+TPTP,10,Status,True
+TPTP,11,Resolution,True
+TPTP,12,Depends on,True
+TPTP,13,Dupe of,True
+TPTP,14,Blocks,True
+TPTP,15,Groups,True
+TPTP,16,Flags,True
+TPTP,17,Severity,True
+TPTP,18,Priority,True
+TPTP,19,Deadline,True
+TPTP,20,Target Milestone,True
+TPTP,21,Creator,True
+TPTP,22,Creator Detail,True
+TPTP,23,Creation time,True
+TPTP,24,Assigned to,True
+TPTP,25,Assigned to detail,True
+TPTP,26,CC,True
+TPTP,27,CC detail,True
+TPTP,28,Is CC accessible,True
+TPTP,29,Is confirmed,True
+TPTP,30,Is open,True
+TPTP,31,Is creator accessible,True
+TPTP,32,Summary,True
+TPTP,33,Description,True
+TPTP,34,URL,True
+TPTP,35,Whiteboard,True
+TPTP,36,Keywords,True
+TPTP,37,See also,True
+TPTP,38,Last change time,True
+TPTP,39,QA contact,True
+TPTP,40,History/Activity Log,True
+TPTP,41,Comments,True
+TPTP,42,Attachments,True

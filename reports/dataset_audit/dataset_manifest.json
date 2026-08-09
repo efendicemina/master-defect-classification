@@ -1,0 +1,108 @@
+{
+  "audit": {
+    "platform": "macOS-26.6.1-arm64-arm-64bit",
+    "python": "3.12.13",
+    "total_elapsed_seconds": 0.113
+  },
+  "datasets": [
+    {
+      "field_audited_rows": 23308,
+      "historical_comparison": "MATCH",
+      "historical_reference_count": 23308,
+      "malformed_bad_line_count": 0,
+      "project": "BIRT",
+      "raw_row_count": 23308,
+      "source_relative_path": "C_BIRT/BIRT_dataset_issues.csv",
+      "source_size_bytes": 2752122706,
+      "successfully_parsed_rows": 23308
+    },
+    {
+      "field_audited_rows": 13993,
+      "historical_comparison": "MATCH",
+      "historical_reference_count": 13993,
+      "malformed_bad_line_count": 0,
+      "project": "MYLYN",
+      "raw_row_count": 13993,
+      "source_relative_path": "C_mylyn/MYLYN_dataset_issues.csv",
+      "source_size_bytes": 816159025,
+      "successfully_parsed_rows": 13993
+    },
+    {
+      "field_audited_rows": 22371,
+      "historical_comparison": "MATCH",
+      "historical_reference_count": 22371,
+      "malformed_bad_line_count": 0,
+      "project": "CDT",
+      "raw_row_count": 22371,
+      "source_relative_path": "P_CDT/CDT_dataset_issues.csv",
+      "source_size_bytes": 3273003984,
+      "successfully_parsed_rows": 22371
+    },
+    {
+      "field_audited_rows": 14559,
+      "historical_comparison": "MATCH",
+      "historical_reference_count": 14559,
+      "malformed_bad_line_count": 1,
+      "project": "EQUINOX",
+      "raw_row_count": 14559,
+      "source_relative_path": "P_Equinox/Equinox_dataset_issues.csv",
+      "source_size_bytes": 2040945111,
+      "successfully_parsed_rows": 14559
+    },
+    {
+      "field_audited_rows": 63266,
+      "historical_comparison": "MATCH",
+      "historical_reference_count": 63266,
+      "malformed_bad_line_count": 0,
+      "project": "JDT",
+      "raw_row_count": 63266,
+      "source_relative_path": "P_JDT/JDT_dataset_issues.csv",
+      "source_size_bytes": 6377569970,
+      "successfully_parsed_rows": 63266
+    },
+    {
+      "field_audited_rows": 17639,
+      "historical_comparison": "MATCH",
+      "historical_reference_count": 17639,
+      "malformed_bad_line_count": 3,
+      "project": "PDE",
+      "raw_row_count": 17639,
+      "source_relative_path": "P_PDE/PDE_dataset_issues.csv",
+      "source_size_bytes": 1332656466,
+      "successfully_parsed_rows": 17639
+    },
+    {
+      "field_audited_rows": 13253,
+      "historical_comparison": "MATCH",
+      "historical_reference_count": 13253,
+      "malformed_bad_line_count": 0,
+      "project": "PAPYRUS",
+      "raw_row_count": 13253,
+      "source_relative_path": "P_Papyrus/Papyrus_dataset_issues.csv",
+      "source_size_bytes": 1003621845,
+      "successfully_parsed_rows": 13253
+    },
+    {
+      "field_audited_rows": 122496,
+      "historical_comparison": "MATCH",
+      "historical_reference_count": 122496,
+      "malformed_bad_line_count": 0,
+      "project": "PLATFORM",
+      "raw_row_count": 122496,
+      "source_relative_path": "P_Platform/Platform_dataset_issues.csv",
+      "source_size_bytes": 15340818646,
+      "successfully_parsed_rows": 122496
+    },
+    {
+      "field_audited_rows": 10579,
+      "historical_comparison": "MATCH",
+      "historical_reference_count": 10579,
+      "malformed_bad_line_count": 0,
+      "project": "TPTP",
+      "raw_row_count": 10579,
+      "source_relative_path": "P_TPTP/TPTP_dataset_issues.csv",
+      "source_size_bytes": 991170529,
+      "successfully_parsed_rows": 10579
+    }
+  ]
+}

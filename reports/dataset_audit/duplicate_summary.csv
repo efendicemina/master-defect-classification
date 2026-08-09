@@ -1,0 +1,11 @@
+scope,project,rows_in_duplicate_groups,duplicate_groups,largest_duplicate_group
+within_project,BIRT,306,137,8
+within_project,MYLYN,165,63,14
+within_project,CDT,197,90,5
+within_project,EQUINOX,70,31,5
+within_project,JDT,428,197,7
+within_project,PDE,138,62,4
+within_project,PAPYRUS,54,25,3
+within_project,PLATFORM,1052,458,10
+within_project,TPTP,235,82,47
+cross_project,ALL,506,145,22

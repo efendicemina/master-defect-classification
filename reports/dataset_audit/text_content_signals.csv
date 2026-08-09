@@ -1,0 +1,10 @@
+project,successfully_parsed_rows,field_audited_rows,fully_empty_rows,malformed_records,rows_with_obvious_html,rows_with_url,rows_with_email_like_text,rows_with_code_or_stacktrace_indicator
+BIRT,23308,23308,0,0,1884,1353,96,4483
+MYLYN,13993,13993,0,0,735,1597,118,2374
+CDT,22371,22371,0,0,2927,1619,193,4704
+EQUINOX,14559,14559,0,1,1456,2321,232,3452
+JDT,63266,63266,0,0,8294,4121,579,27705
+PDE,17639,17639,0,3,1724,1264,196,3685
+PAPYRUS,13253,13253,0,0,592,838,63,2780
+PLATFORM,122496,122496,0,0,9040,10102,1161,24627
+TPTP,10579,10579,0,0,928,1045,61,1917
