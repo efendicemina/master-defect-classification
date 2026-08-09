@@ -1,0 +1,13 @@
+version = 1
+
+[projects]
+BIRT = "C_BIRT/BIRT_dataset_issues.csv"
+MYLYN = "C_mylyn/MYLYN_dataset_issues.csv"
+CDT = "P_CDT/CDT_dataset_issues.csv"
+EQUINOX = "P_Equinox/Equinox_dataset_issues.csv"
+JDT = "P_JDT/JDT_dataset_issues.csv"
+PDE = "P_PDE/PDE_dataset_issues.csv"
+PAPYRUS = "P_Papyrus/Papyrus_dataset_issues.csv"
+PLATFORM = "P_Platform/Platform_dataset_issues.csv"
+TPTP = "P_TPTP/TPTP_dataset_issues.csv"
+

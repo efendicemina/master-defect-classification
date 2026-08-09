@@ -1,0 +1,53 @@
+# Virtual environments and local configuration
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Python caches, builds, and test tooling
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Raw/external and generated datasets
+data/raw/
+data/external/
+data/interim/
+data/processed/
+datasets/
+*.parquet
+*.arrow
+*.feather
+
+# Large/generated model and experiment artifacts
+models/
+checkpoints/
+artifacts/
+outputs/
+runs/
+wandb/
+mlruns/
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+
+# Notebook and temporary files
+.ipynb_checkpoints/
+tmp/
+temp/
+*.log
+
