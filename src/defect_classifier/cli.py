@@ -19,6 +19,7 @@ from defect_classifier.cv_manifests import CvManifestError, materialize_frozen_c
 from defect_classifier.dataset_audits import AuditError, run_audit
 from defect_classifier.preparation import PreparationError, prepare_protocol_v1
 from defect_classifier.protocol import ProtocolError, load_protocol
+from defect_classifier.semantic_pipeline import run_semantic_pipeline
 from defect_classifier.verification import verify_dataset
 
 
@@ -112,6 +113,32 @@ def build_parser() -> argparse.ArgumentParser:
     )
     optimize.add_argument("--task", choices=("S6", "S3", "S2"))
     optimize.add_argument("--no-resume", action="store_true")
+    semantic = subparsers.add_parser(
+        "run-semantic-embeddings", help="run development-only Phase B1 semantic embeddings"
+    )
+    semantic.add_argument("--protocol", type=Path, help="override protocol config")
+    semantic.add_argument("--config", type=Path, help="override semantic config")
+    semantic.add_argument(
+        "--stage", choices=("all", "preflight", "smoke", "materialize", "benchmark"), default="all"
+    )
+    semantic.add_argument("--task", choices=("S6", "S3", "S2"))
+    semantic.add_argument("--encoder", choices=("E1", "E2"))
+    semantic.add_argument(
+        "--development-dir", type=Path, default=Path("data/processed/protocol_v1/development")
+    )
+    semantic.add_argument(
+        "--manifest-dir", type=Path, default=Path("data/processed/protocol_v1/cv_manifests")
+    )
+    semantic.add_argument("--protocol-report-dir", type=Path, default=Path("reports/protocol_v1"))
+    semantic.add_argument(
+        "--a1-report-dir", type=Path, default=Path("reports/classical_benchmark_v1")
+    )
+    semantic.add_argument(
+        "--a2-report-dir", type=Path, default=Path("reports/classical_optimization_v1")
+    )
+    semantic.add_argument("--cache-root", type=Path, default=Path("data/processed/embeddings_v1"))
+    semantic.add_argument("--report-dir", type=Path, default=Path("reports/semantic_embeddings_v1"))
+    semantic.add_argument("--no-resume", action="store_true")
     return parser
 
 
@@ -119,6 +146,32 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     print(f"Python: {platform.python_version()} ({sys.executable})")
     print(f"Platform: {platform.platform()}")
+    if args.command == "run-semantic-embeddings":
+        try:
+            result = run_semantic_pipeline(
+                stage=args.stage,
+                development_dir=args.development_dir.resolve(),
+                manifest_dir=args.manifest_dir.resolve(),
+                protocol_report_dir=args.protocol_report_dir.resolve(),
+                a1_report_dir=args.a1_report_dir.resolve(),
+                a2_report_dir=args.a2_report_dir.resolve(),
+                cache_root=args.cache_root.resolve(),
+                report_dir=args.report_dir.resolve(),
+                protocol=load_protocol(args.protocol),
+                config_path=args.config,
+                task_filter=args.task,
+                encoder_filter=args.encoder,
+                resume=not args.no_resume,
+            )
+        except (ProtocolError, BenchmarkError, OSError, KeyError, RuntimeError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        benchmark = result.get("benchmark", {})
+        print(f"MPS built: {result['preflight']['mps_is_built']}")
+        print(f"MPS available: {result['preflight']['mps_is_available']}")
+        print(f"Successful competitive fits: {benchmark.get('successful', 0)}")
+        print(f"Failed competitive fits: {benchmark.get('failed', 0)}")
+        return 0
     if args.command == "run-classical-optimization":
         try:
             protocol = load_protocol(args.protocol)

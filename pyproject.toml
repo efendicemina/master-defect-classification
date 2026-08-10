@@ -20,6 +20,11 @@ dev = [
   "pytest>=8.3,<10",
   "ruff>=0.9,<1",
 ]
+semantic = [
+  "torch>=2.8,<3",
+  "sentence-transformers>=5,<6",
+  "transformers>=4.55,<6",
+]
 
 [project.scripts]
 defect-classifier = "defect_classifier.cli:main"

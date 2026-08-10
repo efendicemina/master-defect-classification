@@ -1,0 +1,28 @@
+benchmark_id = "semantic-embeddings-v1"
+seed = 20260809
+normalize_embeddings = true
+output_dtype = "float32"
+batch_size = 64
+c = 1.0
+classifiers = ["LOGREG", "LINEARSVC"]
+class_weights = ["NONE", "BALANCED"]
+tasks = ["S6", "S3", "S2"]
+folds = [1, 2, 3]
+
+[[encoders]]
+id = "E1"
+model_id = "sentence-transformers/all-MiniLM-L6-v2"
+
+[[encoders]]
+id = "E2"
+model_id = "sentence-transformers/all-mpnet-base-v2"
+
+[models]
+logreg_solver = "liblinear"
+multiclass_logreg_solver = "lbfgs"
+logreg_max_iter = 1000
+linearsvc_max_iter = 5000
+
+[smoke]
+sample_size = 4
+batch_size = 2

@@ -1,0 +1,58 @@
+[
+  {
+    "batch_size_final": 64,
+    "batch_size_initial": 64,
+    "batch_size_reductions": [],
+    "cache_membership_matches_development": true,
+    "cache_size_bytes": 295411578,
+    "development_embedding_count": 207575,
+    "device": "mps",
+    "dtype": "float32",
+    "embedding_dimension": 384,
+    "encoder_id": "E1",
+    "locked_membership_overlap": 0,
+    "locked_overlap_basis": "exact cache membership equals frozen DEVELOPMENT partition",
+    "max_sequence_length": 256,
+    "model_class": "BertModel",
+    "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+    "normalize_embeddings": true,
+    "pooling_mode": {
+      "embedding_dimension": 384,
+      "include_prompt": true,
+      "pooling_mode": "mean"
+    },
+    "provenance_fingerprint": "3624979ac66096a4cffa1690a54e0fb8e0eeeb2db452b19f1b6ea98b40ffa90b",
+    "resolved_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "runtime_seconds": 544.6426126250008,
+    "tokenizer_class": "BertTokenizer",
+    "trust_remote_code": false
+  },
+  {
+    "batch_size_final": 64,
+    "batch_size_initial": 64,
+    "batch_size_reductions": [],
+    "cache_membership_matches_development": true,
+    "cache_size_bytes": 591816188,
+    "development_embedding_count": 207575,
+    "device": "mps",
+    "dtype": "float32",
+    "embedding_dimension": 768,
+    "encoder_id": "E2",
+    "locked_membership_overlap": 0,
+    "locked_overlap_basis": "exact cache membership equals frozen DEVELOPMENT partition",
+    "max_sequence_length": 384,
+    "model_class": "MPNetModel",
+    "model_id": "sentence-transformers/all-mpnet-base-v2",
+    "normalize_embeddings": true,
+    "pooling_mode": {
+      "embedding_dimension": 768,
+      "include_prompt": true,
+      "pooling_mode": "mean"
+    },
+    "provenance_fingerprint": "2070baae0ec0849db2d07ed99d99fd2a70cb56914e1df95dc164054515f864d4",
+    "resolved_revision": "e8c3b32edf5434bc2275fc9bab85f82640a19130",
+    "runtime_seconds": 6216.566035042,
+    "tokenizer_class": "MPNetTokenizer",
+    "trust_remote_code": false
+  }
+]
