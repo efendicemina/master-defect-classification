@@ -1,0 +1,25 @@
+experiment_id = "transformer-finetuning-lite-v1"
+seed = 20260809
+model_id = "sentence-transformers/all-MiniLM-L6-v2"
+resolved_revision = "1110a243fdf4706b3f48f1d95db1a4f5529b4d41"
+max_length = 256
+learning_rate = 2e-5
+num_train_epochs = 3
+per_device_train_batch_size = 16
+per_device_eval_batch_size = 32
+gradient_accumulation_steps = 1
+class_weighting = "balanced_train_only"
+early_stopping = false
+final_epoch_selection = 3
+trust_remote_code = false
+
+[feasibility]
+task = "S2"
+fold = 1
+training_rows = 10000
+maximum_projected_hours = 24.0
+
+[smoke]
+task = "S2"
+fold = 1
+training_rows = 8

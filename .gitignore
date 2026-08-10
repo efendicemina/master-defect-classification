@@ -62,3 +62,5 @@ reports/lexical_semantic_fusion_v1/.work/
 reports/transformer_finetuning_v1/.work/
 data/processed/transformer_tokens_v1/
 data/processed/transformer_checkpoints_v1/
+reports/transformer_finetuning_lite_v1/.work/
+data/processed/transformer_lite_checkpoints_v1/

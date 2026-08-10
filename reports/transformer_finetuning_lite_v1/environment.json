@@ -1,0 +1,74 @@
+{
+  "bf16_error": null,
+  "competitive_models_refitted_during_finalization": 0,
+  "competitive_runtime_seconds": 38248.830336793006,
+  "device": "mps",
+  "dtype": "bfloat16",
+  "engineering_feasibility": {
+    "bounded_training_rows": 10000,
+    "class_weights": {
+      "HIGH_IMPACT": 2.387774594078319,
+      "LOWER_IMPACT": 0.6324310650139134
+    },
+    "competitive_execution_allowed": true,
+    "competitive_training_examples_across_epochs": 2802204,
+    "dtype": "bfloat16",
+    "elapsed_seconds": 423.59899841699917,
+    "epoch_diagnostics": [
+      {
+        "epoch": 1,
+        "steps": 625,
+        "training_loss": 0.6706849182128907,
+        "training_seconds": 105.27927470800023
+      },
+      {
+        "epoch": 2,
+        "steps": 625,
+        "training_loss": 0.6142052466869354,
+        "training_seconds": 143.4529908330005
+      },
+      {
+        "epoch": 3,
+        "steps": 625,
+        "training_loss": 0.5897489036083221,
+        "training_seconds": 174.86583087500003
+      }
+    ],
+    "examples_per_second": 70.82169719973561,
+    "fold": 1,
+    "maximum_projected_hours": 24.0,
+    "process_rss_after_bytes": 1082277888,
+    "process_rss_before_bytes": 2190295040,
+    "projected_hours": 10.9908408125936,
+    "projected_seconds": 39567.02692533696,
+    "stage": "ENGINEERING_ONLY",
+    "steps": 1875,
+    "steps_per_second": 4.426356074983476,
+    "task": "S2"
+  },
+  "existing_checkpoints_reused": true,
+  "locked_test_model_performance_accessed": false,
+  "locked_test_tokenized": false,
+  "locked_test_used_for_tuning": false,
+  "mps_is_available": true,
+  "mps_is_built": true,
+  "packages": {
+    "accelerate": "1.14.0",
+    "protobuf": "6.33.6",
+    "sentencepiece": "0.2.2",
+    "torch": "2.13.0",
+    "transformers": "5.14.1"
+  },
+  "platform": "macOS-26.6.1-arm64-arm-64bit",
+  "python": "3.12.13",
+  "reference_sha256": {
+    "A2_LEADERBOARD": "5343448b359fc181f2e341ff6c9a942767f3334d214b91cce7aa41405cdcf54f",
+    "A2_REPORT": "4ab436dc330e80a66a1cea5dcfb9c364c8d6f947c4d8f757fd25486c0ecd2a8d",
+    "B15_REPORT": "e7bcf9afe11ac5b29f0ff0996c5c011351684164048c7afd871062e242bd99c7",
+    "B15_SUMMARY": "0b27212eea2bccd615c228fab6d9d6fd4d7d33a3f5595c41e8a9c656d561ba8f",
+    "B1_LEADERBOARD": "5b4e1c7437827dfd547d2aca46e1e5516203e641f1b070970c31431acc3d7268",
+    "B1_REPORT": "7809d204c0f4b85eb162c071742bf92a6d7d078b355c76537ffb382fc4f09804",
+    "B2_ENVIRONMENT": "150179731e7708b82c847fd60d31a5a3291faff4a8a6c3aeb454160a87cf2f1d",
+    "B2_REPORT": "c6f2162e7a1525394883d2948947f97ed3b2efe06481497124e19673581c7c03"
+  }
+}

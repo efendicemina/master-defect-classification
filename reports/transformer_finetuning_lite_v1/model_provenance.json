@@ -1,0 +1,17 @@
+{
+  "architecture": "BertForSequenceClassification",
+  "config_sha256": "1900a248c766b85e70ba38f94e243f6f03c55e91f7b96ef1492880ba6e8ce407",
+  "development_membership_sha256": "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f",
+  "device": "mps",
+  "dtype": "bfloat16",
+  "hidden_size": 384,
+  "layer_count": 6,
+  "max_length": 256,
+  "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+  "parameter_count": 22713986,
+  "protocol_sha256": "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda",
+  "resolved_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+  "tokenizer_class": "BertTokenizer",
+  "trainable_parameter_count": 22713986,
+  "trust_remote_code": false
+}
