@@ -1,0 +1,16 @@
+{
+  "architecture": "DebertaV2ForSequenceClassification",
+  "config_sha256": "9a00768d45e75b35eaaeac0bca62cf0e1f89c3d54e9f73e91f615deb7703b438",
+  "development_membership_sha256": "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f",
+  "device": "mps",
+  "dtype": "bfloat16",
+  "max_length": 256,
+  "model_id": "microsoft/deberta-v3-small",
+  "parameter_count": 141896450,
+  "protocol_sha256": "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda",
+  "resolved_revision": "a36c739020e01763fe789b4b85e2df55d6180012",
+  "tokenizer_class": "DebertaV2Tokenizer",
+  "tokenizer_model_max_length": 1000000000000000019884624838656,
+  "trainable_parameter_count": 141896450,
+  "trust_remote_code": false
+}

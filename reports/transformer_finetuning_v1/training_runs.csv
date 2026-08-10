@@ -1,0 +1,2 @@
+elapsed_seconds,epochs,examples_per_second,fold,run_id,status,steps,steps_per_second,task,training_rows
+1547.8398572920005,3,19.381850040020318,1,B2-ENGINEERING-FEASIBILITY-S2-FOLD1,ENGINEERING_ONLY,3750,2.4227312550025397,S2,10000

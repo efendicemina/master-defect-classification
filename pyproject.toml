@@ -21,6 +21,9 @@ dev = [
   "ruff>=0.9,<1",
 ]
 semantic = [
+  "accelerate>=1.10,<2",
+  "protobuf>=6,<7",
+  "sentencepiece>=0.2,<1",
   "torch>=2.8,<3",
   "sentence-transformers>=5,<6",
   "transformers>=4.55,<6",

@@ -21,6 +21,7 @@ from defect_classifier.lexical_semantic_fusion import run_fusion_benchmark
 from defect_classifier.preparation import PreparationError, prepare_protocol_v1
 from defect_classifier.protocol import ProtocolError, load_protocol
 from defect_classifier.semantic_pipeline import run_semantic_pipeline
+from defect_classifier.transformer_finetuning import run_b2_pipeline
 from defect_classifier.verification import verify_dataset
 
 
@@ -161,6 +162,34 @@ def build_parser() -> argparse.ArgumentParser:
         "--report-dir", type=Path, default=Path("reports/lexical_semantic_fusion_v1")
     )
     fusion.add_argument("--no-resume", action="store_true")
+    transformer = subparsers.add_parser(
+        "run-transformer-finetuning",
+        help="run development-only Phase B2 controlled DeBERTa fine-tuning",
+    )
+    transformer.add_argument("--protocol", type=Path, help="override protocol config")
+    transformer.add_argument("--config", type=Path, help="override fine-tuning config")
+    transformer.add_argument(
+        "--stage", choices=("all", "preflight", "feasibility", "benchmark"), default="all"
+    )
+    transformer.add_argument(
+        "--development-dir", type=Path, default=Path("data/processed/protocol_v1/development")
+    )
+    transformer.add_argument(
+        "--manifest-dir", type=Path, default=Path("data/processed/protocol_v1/cv_manifests")
+    )
+    transformer.add_argument(
+        "--protocol-report-dir", type=Path, default=Path("reports/protocol_v1")
+    )
+    transformer.add_argument("--reports-root", type=Path, default=Path("reports"))
+    transformer.add_argument(
+        "--report-dir", type=Path, default=Path("reports/transformer_finetuning_v1")
+    )
+    transformer.add_argument(
+        "--checkpoint-root",
+        type=Path,
+        default=Path("data/processed/transformer_checkpoints_v1"),
+    )
+    transformer.add_argument("--no-resume", action="store_true")
     return parser
 
 
@@ -168,6 +197,28 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     print(f"Python: {platform.python_version()} ({sys.executable})")
     print(f"Platform: {platform.platform()}")
+    if args.command == "run-transformer-finetuning":
+        try:
+            result = run_b2_pipeline(
+                stage=args.stage,
+                development_dir=args.development_dir.resolve(),
+                manifest_dir=args.manifest_dir.resolve(),
+                protocol_report_dir=args.protocol_report_dir.resolve(),
+                reports_root=args.reports_root.resolve(),
+                report_dir=args.report_dir.resolve(),
+                checkpoint_root=args.checkpoint_root.resolve(),
+                protocol=load_protocol(args.protocol),
+                config_path=args.config,
+                resume=not args.no_resume,
+            )
+        except (ProtocolError, BenchmarkError, OSError, KeyError, RuntimeError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(f"Successful competitive fits: {result.get('successful', 0)}")
+        print(f"Failed competitive fits: {result.get('failed', 0)}")
+        if result.get("stopped_before_competitive"):
+            print("Competitive execution stopped by the 24-hour feasibility rule")
+        return 0
     if args.command == "run-lexical-semantic-fusion":
         try:
             result = run_fusion_benchmark(
