@@ -1,0 +1,41 @@
+experiment_id = "lexical-semantic-fusion-v1"
+seed = 20260809
+semantic_encoder_id = "E2"
+semantic_model_id = "sentence-transformers/all-mpnet-base-v2"
+semantic_revision = "e8c3b32edf5434bc2275fc9bab85f82640a19130"
+semantic_dimension = 768
+semantic_normalized = true
+semantic_weight = 1.0
+
+[models]
+logreg_solver = "liblinear"
+logreg_max_iter = 1000
+linearsvc_max_iter = 5000
+
+[tasks.S6]
+representation_id = "S6-R3"
+representation = "CHAR"
+classifier = "LINEARSVC"
+class_weight = "BALANCED"
+c = 0.25
+
+[tasks.S3]
+representation_id = "S3-R5"
+representation = "WORD"
+classifier = "LOGREG"
+class_weight = "BALANCED"
+c = 2.0
+
+[tasks.S2]
+representation_id = "S2-R3"
+representation = "WORD_CHAR"
+classifier = "LOGREG"
+class_weight = "BALANCED"
+c = 2.0
+
+[smoke]
+task = "S6"
+fold = 1
+max_training_rows = 2000
+max_validation_rows = 1000
+max_features = 5000

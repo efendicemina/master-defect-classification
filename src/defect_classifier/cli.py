@@ -17,6 +17,7 @@ from defect_classifier.classical_optimization import run_classical_optimization
 from defect_classifier.config import ConfigurationError, resolve_data_root
 from defect_classifier.cv_manifests import CvManifestError, materialize_frozen_cv_manifests
 from defect_classifier.dataset_audits import AuditError, run_audit
+from defect_classifier.lexical_semantic_fusion import run_fusion_benchmark
 from defect_classifier.preparation import PreparationError, prepare_protocol_v1
 from defect_classifier.protocol import ProtocolError, load_protocol
 from defect_classifier.semantic_pipeline import run_semantic_pipeline
@@ -139,6 +140,27 @@ def build_parser() -> argparse.ArgumentParser:
     semantic.add_argument("--cache-root", type=Path, default=Path("data/processed/embeddings_v1"))
     semantic.add_argument("--report-dir", type=Path, default=Path("reports/semantic_embeddings_v1"))
     semantic.add_argument("--no-resume", action="store_true")
+    fusion = subparsers.add_parser(
+        "run-lexical-semantic-fusion",
+        help="run development-only Phase B1.5 fixed lexical and MPNet fusion",
+    )
+    fusion.add_argument("--protocol", type=Path, help="override protocol config")
+    fusion.add_argument("--config", type=Path, help="override fusion config")
+    fusion.add_argument("--stage", choices=("all", "smoke", "benchmark"), default="all")
+    fusion.add_argument("--task", choices=("S6", "S3", "S2"))
+    fusion.add_argument(
+        "--development-dir", type=Path, default=Path("data/processed/protocol_v1/development")
+    )
+    fusion.add_argument(
+        "--manifest-dir", type=Path, default=Path("data/processed/protocol_v1/cv_manifests")
+    )
+    fusion.add_argument("--protocol-report-dir", type=Path, default=Path("reports/protocol_v1"))
+    fusion.add_argument("--cache-root", type=Path, default=Path("data/processed/embeddings_v1"))
+    fusion.add_argument("--reports-root", type=Path, default=Path("reports"))
+    fusion.add_argument(
+        "--report-dir", type=Path, default=Path("reports/lexical_semantic_fusion_v1")
+    )
+    fusion.add_argument("--no-resume", action="store_true")
     return parser
 
 
@@ -146,6 +168,28 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     print(f"Python: {platform.python_version()} ({sys.executable})")
     print(f"Platform: {platform.platform()}")
+    if args.command == "run-lexical-semantic-fusion":
+        try:
+            result = run_fusion_benchmark(
+                args.development_dir.resolve(),
+                args.manifest_dir.resolve(),
+                args.protocol_report_dir.resolve(),
+                args.cache_root.resolve(),
+                args.reports_root.resolve(),
+                args.report_dir.resolve(),
+                load_protocol(args.protocol),
+                config_path=args.config,
+                stage=args.stage,
+                task_filter=args.task,
+                resume=not args.no_resume,
+            )
+        except (ProtocolError, BenchmarkError, OSError, KeyError, RuntimeError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(f"Successful competitive fits: {result.get('successful', 0)}")
+        print(f"Failed competitive fits: {result.get('failed', 0)}")
+        print(f"Runtime: {result['runtime_seconds']:.3f} seconds")
+        return 0
     if args.command == "run-semantic-embeddings":
         try:
             result = run_semantic_pipeline(
