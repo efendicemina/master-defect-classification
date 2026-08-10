@@ -1,0 +1,13 @@
+{
+  "cache_basis": "same development rows, dimension, dtype, normalization, and shard format as B1 E2",
+  "conservative_assumptions": "75% measured chunk throughput; 25% fusion/overhead margin",
+  "conservative_embedding_seconds": 23416.853655001378,
+  "nine_fit_fusion_fit_prediction_seconds": 1731.289,
+  "projected_cache_bytes_central": 591816188,
+  "projected_cache_bytes_upper": 642670400,
+  "raw_float32_embedding_bytes": 637670400,
+  "semantic_embedding_generation_seconds": 17562.640241251032,
+  "total_central_seconds": 19946.461241251032,
+  "total_conservative_seconds": 26396.629905001377,
+  "validation_reporting_overhead_seconds": 652.5319999999999
+}

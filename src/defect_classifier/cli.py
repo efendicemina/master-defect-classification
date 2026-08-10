@@ -18,6 +18,7 @@ from defect_classifier.config import ConfigurationError, resolve_data_root
 from defect_classifier.cv_manifests import CvManifestError, materialize_frozen_cv_manifests
 from defect_classifier.dataset_audits import AuditError, run_audit
 from defect_classifier.lexical_semantic_fusion import run_fusion_benchmark
+from defect_classifier.long_text_embeddings import run_long_text_feasibility
 from defect_classifier.preparation import PreparationError, prepare_protocol_v1
 from defect_classifier.protocol import ProtocolError, load_protocol
 from defect_classifier.semantic_pipeline import run_semantic_pipeline
@@ -163,6 +164,26 @@ def build_parser() -> argparse.ArgumentParser:
         "--report-dir", type=Path, default=Path("reports/lexical_semantic_fusion_v1")
     )
     fusion.add_argument("--no-resume", action="store_true")
+    long_text = subparsers.add_parser(
+        "run-long-text-fusion",
+        help="run Phase B1.6 development-only long-text feasibility estimation",
+    )
+    long_text.add_argument("--protocol", type=Path, help="override protocol config")
+    long_text.add_argument("--config", type=Path, help="override B1.6 config")
+    long_text.add_argument("--stage", choices=("estimate", "full"), default="estimate")
+    long_text.add_argument(
+        "--development-dir", type=Path, default=Path("data/processed/protocol_v1/development")
+    )
+    long_text.add_argument("--protocol-report-dir", type=Path, default=Path("reports/protocol_v1"))
+    long_text.add_argument("--reports-root", type=Path, default=Path("reports"))
+    long_text.add_argument("--report-dir", type=Path, default=Path("reports/long_text_fusion_v1"))
+    long_text.add_argument(
+        "--cache-root", type=Path, default=Path("data/processed/long_text_embeddings_v1")
+    )
+    long_text.add_argument(
+        "--checkpoint-root", type=Path, default=Path("data/processed/long_text_fusion_v1")
+    )
+    long_text.add_argument("--resume", action=argparse.BooleanOptionalAction, default=True)
     transformer = subparsers.add_parser(
         "run-transformer-finetuning",
         help="run development-only Phase B2 controlled DeBERTa fine-tuning",
@@ -228,6 +249,26 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     print(f"Python: {platform.python_version()} ({sys.executable})")
     print(f"Platform: {platform.platform()}")
+    if args.command == "run-long-text-fusion":
+        try:
+            result = run_long_text_feasibility(
+                development_dir=args.development_dir.resolve(),
+                protocol_report_dir=args.protocol_report_dir.resolve(),
+                reports_root=args.reports_root.resolve(),
+                report_dir=args.report_dir.resolve(),
+                protocol=load_protocol(args.protocol),
+                config_path=args.config,
+                stage=args.stage,
+                resume=args.resume,
+                cache_root=args.cache_root.resolve(),
+                checkpoint_root=args.checkpoint_root.resolve(),
+            )
+        except (ProtocolError, BenchmarkError, OSError, KeyError, RuntimeError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(f"Audited DEVELOPMENT rows: {result['audit']['total_records']}")
+        print(f"Projected MPNet chunks: {result['audit']['total_chunks']}")
+        return 0
     if args.command == "run-transformer-finetuning-lite":
         try:
             if args.stage == "finalize":

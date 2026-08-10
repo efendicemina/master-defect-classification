@@ -1,0 +1,33 @@
+experiment_id = "long-text-fusion-v1"
+seed = 20260809
+model_id = "sentence-transformers/all-mpnet-base-v2"
+resolved_revision = "e8c3b32edf5434bc2275fc9bab85f82640a19130"
+embedding_dimension = 768
+chunk_length = 384
+chunk_overlap = 64
+batch_size = 64
+normalize_chunks = true
+document_pooling = "arithmetic_mean_then_l2"
+semantic_weight = 1.0
+target_benchmark_chunks = 10000
+
+[tasks.S6]
+representation_id = "S6-R3"
+representation = "CHAR"
+classifier = "LINEARSVC"
+class_weight = "BALANCED"
+c = 0.25
+
+[tasks.S3]
+representation_id = "S3-R5"
+representation = "WORD"
+classifier = "LOGREG"
+class_weight = "BALANCED"
+c = 2.0
+
+[tasks.S2]
+representation_id = "S2-R3"
+representation = "WORD_CHAR"
+classifier = "LOGREG"
+class_weight = "BALANCED"
+c = 2.0

@@ -1,0 +1,17 @@
+{
+  "batch_size_final": 64,
+  "batch_size_initial": 64,
+  "batch_size_reductions": [],
+  "chunks_per_second": 23.198619023296565,
+  "document_pooling_seconds": 0.018233749993669335,
+  "documents_per_second": 11.560169768047873,
+  "encoder_frozen": true,
+  "encoding_seconds": 431.5343077080033,
+  "gradients_enabled": false,
+  "mps_fallback_events": 0,
+  "oom_events": 0,
+  "sample_chunks": 10011,
+  "sample_documents": 5004,
+  "tokenization_chunk_construction_seconds": 1.3130738750041928,
+  "total_benchmark_seconds": 432.8656153330012
+}
