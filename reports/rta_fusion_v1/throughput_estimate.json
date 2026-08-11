@@ -1,0 +1,30 @@
+{
+  "batch_size": 32,
+  "cpu_fallback_events": 0,
+  "documents_per_second": 25.422318149613673,
+  "encoding_seconds": 390.928191125,
+  "examples_per_second": 25.580145476902896,
+  "mps_driver_allocated_bytes_after": 2165080064,
+  "normalization_seconds": 0.014892584003973752,
+  "oom_events": 0,
+  "peak_rss_bytes": 1895497728,
+  "preflight": {
+    "batch_inference_tested": true,
+    "batch_size": 32,
+    "cpu_fallback_events": 0,
+    "deterministic_repeated_output": true,
+    "dtype": "float32",
+    "encoder_frozen": true,
+    "finite_embeddings": true,
+    "gradients_enabled": false,
+    "long_input_tested": true,
+    "mps_available": true,
+    "mps_used": true,
+    "normalized_embeddings": true,
+    "oom_events": [],
+    "status": "PASS"
+  },
+  "sample_documents": 10000,
+  "tokenization_seconds": 2.4120638340100413,
+  "total_runtime_seconds": 393.35515908300295
+}

@@ -65,3 +65,4 @@ data/processed/transformer_checkpoints_v1/
 reports/transformer_finetuning_lite_v1/.work/
 data/processed/transformer_lite_checkpoints_v1/
 reports/long_text_fusion_v1/.work/
+reports/rta_fusion_v1/.work/

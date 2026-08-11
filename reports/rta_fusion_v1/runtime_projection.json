@@ -1,0 +1,11 @@
+{
+  "conservative_assumptions": "75% measured throughput and 25% fusion/overhead margin",
+  "nine_fit_fusion_fit_prediction_seconds": 1731.289,
+  "projected_cache_bytes_central": 591816188,
+  "projected_cache_bytes_upper": 642670400,
+  "raw_float32_embedding_bytes": 637670400,
+  "semantic_embedding_generation_seconds": 8165.069714665434,
+  "total_central_seconds": 10548.890714665433,
+  "total_conservative_seconds": 13866.53586955391,
+  "validation_reporting_overhead_seconds": 652.5319999999999
+}

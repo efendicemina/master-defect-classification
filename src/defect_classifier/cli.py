@@ -25,6 +25,7 @@ from defect_classifier.long_text_embeddings import (
 )
 from defect_classifier.preparation import PreparationError, prepare_protocol_v1
 from defect_classifier.protocol import ProtocolError, load_protocol
+from defect_classifier.rta_fusion import run_rta_feasibility
 from defect_classifier.semantic_pipeline import run_semantic_pipeline
 from defect_classifier.transformer_finetuning import run_b2_pipeline
 from defect_classifier.transformer_finetuning_lite import run_lite_pipeline
@@ -191,6 +192,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--checkpoint-root", type=Path, default=Path("data/processed/long_text_fusion_v1")
     )
     long_text.add_argument("--resume", action=argparse.BooleanOptionalAction, default=True)
+    rta = subparsers.add_parser(
+        "run-rta-fusion", help="run Phase B3 development-only RTA feasibility estimation"
+    )
+    rta.add_argument("--protocol", type=Path, help="override protocol config")
+    rta.add_argument("--config", type=Path, help="override B3 config")
+    rta.add_argument("--stage", choices=("feasibility", "full"), default="feasibility")
+    rta.add_argument(
+        "--development-dir", type=Path, default=Path("data/processed/protocol_v1/development")
+    )
+    rta.add_argument("--protocol-report-dir", type=Path, default=Path("reports/protocol_v1"))
+    rta.add_argument("--reports-root", type=Path, default=Path("reports"))
+    rta.add_argument("--report-dir", type=Path, default=Path("reports/rta_fusion_v1"))
     transformer = subparsers.add_parser(
         "run-transformer-finetuning",
         help="run development-only Phase B2 controlled DeBERTa fine-tuning",
@@ -256,6 +269,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     print(f"Python: {platform.python_version()} ({sys.executable})")
     print(f"Platform: {platform.platform()}")
+    if args.command == "run-rta-fusion":
+        try:
+            result = run_rta_feasibility(
+                development_dir=args.development_dir.resolve(),
+                protocol_report_dir=args.protocol_report_dir.resolve(),
+                reports_root=args.reports_root.resolve(),
+                report_dir=args.report_dir.resolve(),
+                protocol=load_protocol(args.protocol),
+                config_path=args.config,
+                stage=args.stage,
+            )
+        except (ProtocolError, BenchmarkError, OSError, KeyError, RuntimeError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(f"Audited DEVELOPMENT rows: {result['audit']['total_records']}")
+        print(f"Throughput sample documents: {result['throughput']['sample_documents']}")
+        return 0
     if args.command == "run-long-text-fusion":
         try:
             if args.stage == "finalize":

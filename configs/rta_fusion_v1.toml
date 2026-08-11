@@ -1,0 +1,35 @@
+experiment_id = "rta-fusion-v1"
+seed = 20260809
+model_id = "Colorful/RTA"
+resolved_revision = "56cc614ee7cf17b8c1875e6848037f9e5bafc41a"
+architecture = "RobertaForSequenceClassification"
+representation = "base_encoder_final_layer_first_token"
+embedding_dimension = 768
+max_sequence_length = 512
+normalize_embeddings = true
+dtype = "float32"
+semantic_weight = 1.0
+throughput_sample_documents = 10000
+initial_batch_size = 16
+candidate_batch_size = 32
+
+[tasks.S6]
+representation_id = "S6-R3"
+representation = "CHAR"
+classifier = "LINEARSVC"
+class_weight = "BALANCED"
+c = 0.25
+
+[tasks.S3]
+representation_id = "S3-R5"
+representation = "WORD"
+classifier = "LOGREG"
+class_weight = "BALANCED"
+c = 2.0
+
+[tasks.S2]
+representation_id = "S2-R3"
+representation = "WORD_CHAR"
+classifier = "LOGREG"
+class_weight = "BALANCED"
+c = 2.0
