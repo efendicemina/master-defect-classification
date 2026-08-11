@@ -15,6 +15,7 @@ from defect_classifier.rta_fusion import (
     REFERENCE_HASHES,
     REPRESENTATION,
     extract_first_token,
+    finalize_rta_checkpoints,
     future_fit_count,
     load_rta_config,
     normalize_rta_embeddings,
@@ -74,6 +75,31 @@ def test_feasibility_cannot_launch_full_or_fit():
     assert "run_fusion_benchmark(" not in source
     assert "data/locked" not in source
     assert "competitive_fits_started" in source
+
+
+def test_full_path_uses_authenticated_resume_and_frozen_cv():
+    from defect_classifier import rta_fusion
+
+    source = inspect.getsource(rta_fusion.run_rta_full)
+    assert "sidecar.is_file()" in source
+    assert "RTA shard provenance drift" in source
+    assert "read_shard" in source and "validate_membership" in source
+    assert "resume=resume" in source
+    assert "_load_fold(" in source and "_temporal_folds" not in source
+    assert "data/locked" not in source
+    assert "locked_test_accessed=False" in source
+    assert "for task in TASKS" in source
+
+
+def test_finalization_can_only_reuse_persisted_artifacts():
+    source = inspect.getsource(finalize_rta_checkpoints)
+    assert "read_shard" in source and "existing_checkpoints_reused" in source
+    assert "competitive_models_refitted" in source
+    assert "_load_model(" not in source
+    assert "_encode(" not in source
+    assert "_run_fit(" not in source
+    assert "build_sparse_features(" not in source
+    assert "data/locked" not in source
 
 
 def test_encoder_inputs_use_text_only_without_targets():

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import gc
 import hashlib
 import heapq
 import json
@@ -20,7 +21,14 @@ from typing import Any
 import numpy as np
 
 from defect_classifier.classical_benchmark import BenchmarkError
-from defect_classifier.embedding_cache import atomic_json, validate_embeddings
+from defect_classifier.embedding_cache import (
+    atomic_json,
+    read_shard,
+    stable_id,
+    validate_embeddings,
+    validate_membership,
+    write_shard,
+)
 from defect_classifier.preparation import _membership_fingerprint
 from defect_classifier.protocol import FrozenProtocol
 
@@ -152,13 +160,14 @@ def _load_model(device: str) -> tuple[Any, Any, dict[str, Any]]:
     from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
     tokenizer = AutoTokenizer.from_pretrained(
-        MODEL_ID, revision=MODEL_REVISION, trust_remote_code=False
+        MODEL_ID, revision=MODEL_REVISION, trust_remote_code=False, local_files_only=True
     )
     model = AutoModelForSequenceClassification.from_pretrained(
         MODEL_ID,
         revision=MODEL_REVISION,
         trust_remote_code=False,
         use_safetensors=False,
+        local_files_only=True,
     )
     if type(model).__name__ != ARCHITECTURE or type(tokenizer).__name__ != "RobertaTokenizer":
         raise BenchmarkError("Colorful/RTA architecture or tokenizer drift")
@@ -395,6 +404,690 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writeheader()
         writer.writerows(rows)
     os.replace(temporary, path)
+
+
+def _status(path: Path, **values: Any) -> None:
+    prior = json.loads(path.read_text()) if path.is_file() else {}
+    atomic_json(path, {**prior, **values, "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ")})
+
+
+def _project_provenance(
+    project: str,
+    issue_ids: list[str],
+    development_hash: str,
+    protocol: FrozenProtocol,
+    config_hash: str,
+    tokenizer: Any,
+    batch_size: int,
+) -> dict[str, Any]:
+    return {
+        "status": "SUCCESS",
+        "project": project,
+        "project_membership_sha256": _membership_fingerprint(
+            stable_id(project, issue_id) for issue_id in issue_ids
+        ),
+        "development_membership_sha256": development_hash,
+        "protocol_sha256": protocol.fingerprint,
+        "config_sha256": config_hash,
+        "model_id": MODEL_ID,
+        "resolved_revision": MODEL_REVISION,
+        "tokenizer_class": type(tokenizer).__name__,
+        "max_sequence_length": MAX_LENGTH,
+        "representation": REPRESENTATION,
+        "normalization": "L2",
+        "embedding_dimension": DIMENSION,
+        "dtype": "float32",
+        "batch_size": batch_size,
+        "row_count": len(issue_ids),
+    }
+
+
+def _encode_project_with_recovery(
+    model: Any, tokenizer: Any, texts: list[str], batch_size: int, device: str
+) -> tuple[np.ndarray, int, list[dict[str, Any]]]:
+    import torch
+
+    reductions = []
+    while True:
+        try:
+            values = normalize_rta_embeddings(_encode(model, tokenizer, texts, batch_size, device))
+            return values, batch_size, reductions
+        except RuntimeError as exc:
+            if device != "mps" or batch_size <= 1 or "memory" not in str(exc).lower():
+                raise
+            new_size = max(1, batch_size // 2)
+            reductions.append({"from": batch_size, "to": new_size, "error": str(exc)})
+            batch_size = new_size
+            torch.mps.empty_cache()
+
+
+def run_rta_full(
+    *,
+    development_dir: Path,
+    manifest_dir: Path,
+    protocol_report_dir: Path,
+    reports_root: Path,
+    report_dir: Path,
+    cache_root: Path,
+    checkpoint_root: Path,
+    protocol: FrozenProtocol,
+    config_path: Path | None = None,
+    resume: bool = True,
+) -> dict[str, Any]:
+    """Materialize frozen RTA DEVELOPMENT shards and execute exactly nine fixed fusion fits."""
+    import pyarrow.parquet as pq
+    import torch
+
+    from defect_classifier.classical_benchmark import _load_development_rows, _load_fold
+    from defect_classifier.classical_features import build_sparse_features
+    from defect_classifier.classical_optimization import _feature_config, load_optimization_config
+    from defect_classifier.lexical_semantic_fusion import (
+        _aggregate,
+        _run_fit,
+        _write_reports,
+        fuse_sparse_features,
+        load_fusion_config,
+        selected_variant,
+    )
+
+    config, config_hash = load_rta_config(config_path)
+    references = _verify_references(reports_root)
+    frozen = json.loads((protocol_report_dir / "fingerprints.json").read_text())
+    development_hash = frozen["development_membership_sha256"]
+    if frozen["protocol_sha256"] != protocol.fingerprint:
+        raise BenchmarkError("protocol fingerprint drift")
+    if not torch.backends.mps.is_available():
+        raise BenchmarkError("Phase B3 full run requires available MPS")
+    projects = sorted(development_dir.glob("*.parquet"))
+    if len(projects) != 9:
+        raise BenchmarkError("expected nine frozen DEVELOPMENT project artifacts")
+    status_path = report_dir / ".work" / "background_training.status"
+    print(
+        f"[B3] model={MODEL_ID} revision={MODEL_REVISION} config={config_hash} "
+        f"development={development_hash} locked_test=NOT_ACCESSED",
+        flush=True,
+    )
+    model, tokenizer, _ = _load_model("mps")
+    batch_size = config["candidate_batch_size"]
+    completed_shards = 0
+    shard_metadata = []
+    for path in projects:
+        records = pq.read_table(
+            path, columns=["source_project", "issue_id", "text_combined"]
+        ).to_pylist()
+        project = path.stem
+        issue_ids = [row["issue_id"] for row in records]
+        expected = _project_provenance(
+            project, issue_ids, development_hash, protocol, config_hash, tokenizer, batch_size
+        )
+        shard = semantic_shard_path(cache_root, project)
+        sidecar = shard.with_suffix(".json")
+        if resume and shard.is_file() and sidecar.is_file():
+            stored = json.loads(sidecar.read_text())
+            fixed_expected = {key: value for key, value in expected.items() if key != "batch_size"}
+            stored_batch = stored.get("batch_size")
+            if any(stored.get(key) != value for key, value in fixed_expected.items()) or not (
+                isinstance(stored_batch, int)
+                and 1 <= stored_batch <= config["candidate_batch_size"]
+            ):
+                raise BenchmarkError(f"RTA shard provenance drift: {project}")
+            ids, embeddings = read_shard(shard, DIMENSION)
+            validate_membership(set(ids), {stable_id(project, issue_id) for issue_id in issue_ids})
+            validate_embeddings(embeddings, DIMENSION)
+            completed_shards += 1
+            shard_metadata.append(stored)
+            print(f"[B3] resumed SUCCESS semantic shard {project}", flush=True)
+            continue
+        _status(
+            status_path,
+            state="RUNNING",
+            current_phase=f"embedding:{project}",
+            completed_embedding_shards=completed_shards,
+            total_embedding_shards=9,
+            completed_competitive_fits=0,
+            total_competitive_fits=9,
+            locked_test_accessed=False,
+        )
+        print(f"[B3] starting semantic shard {project} rows={len(records)}", flush=True)
+        embeddings, final_batch_size, reductions = _encode_project_with_recovery(
+            model,
+            tokenizer,
+            [row["text_combined"] for row in records],
+            batch_size,
+            "mps",
+        )
+        if final_batch_size != batch_size:
+            batch_size = final_batch_size
+            expected = _project_provenance(
+                project, issue_ids, development_hash, protocol, config_hash, tokenizer, batch_size
+            )
+        manifest = write_shard(shard, project, issue_ids, embeddings)
+        stored = {**expected, **manifest, "batch_size_reductions": reductions}
+        atomic_json(sidecar, stored)
+        shard_metadata.append(stored)
+        completed_shards += 1
+        _status(
+            status_path,
+            completed_embedding_shards=completed_shards,
+            latest_successful_checkpoint=str(sidecar),
+        )
+        print(f"[B3] SUCCESS semantic shard {project}", flush=True)
+    cache_identity = hashlib.sha256(
+        json.dumps(
+            [(row["project"], row["sha256"]) for row in shard_metadata],
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode()
+    ).hexdigest()
+    atomic_json(
+        cache_root / "RTA" / "metadata.json",
+        {
+            "status": "SUCCESS",
+            "semantic_cache_sha256": cache_identity,
+            "shards": shard_metadata,
+            "development_membership_sha256": development_hash,
+            "config_sha256": config_hash,
+            "locked_test_embedded": False,
+        },
+    )
+    del model, tokenizer
+    gc.collect()
+    torch.mps.empty_cache()
+
+    rows = _load_development_rows(development_dir)
+    development_ids = set(rows)
+    if _membership_fingerprint(development_ids) != development_hash:
+        raise BenchmarkError("development membership fingerprint drift")
+    ids, arrays = [], []
+    for path in sorted((cache_root / "RTA" / "shards").glob("*.parquet")):
+        shard_ids, values = read_shard(path, DIMENSION)
+        ids.extend(shard_ids)
+        arrays.append(values)
+    if len(ids) != len(set(ids)):
+        raise BenchmarkError("duplicate RTA cache identity")
+    validate_membership(set(ids), development_ids)
+    index = {value: position for position, value in enumerate(ids)}
+    embeddings = np.concatenate(arrays)
+    folds = {
+        fold: _load_fold(
+            rows, manifest_dir, protocol_report_dir / "fingerprints.json", protocol, fold
+        )
+        for fold in range(1, 4)
+    }
+    fusion_config, _ = load_fusion_config()
+    a2_config, a2_hash = load_optimization_config()
+    results = []
+    for task in TASKS:
+        variant = selected_variant(a2_config, fusion_config, task)
+        for fold, (train_ids, validation_ids) in folds.items():
+            method = config["tasks"][task]
+            provenance = {
+                "protocol_sha256": protocol.fingerprint,
+                "development_membership_sha256": development_hash,
+                "cv_family": "pooled",
+                "training_membership_sha256": frozen["cv_membership_sha256"][
+                    f"pooled_fold_{fold}_training"
+                ],
+                "validation_membership_sha256": frozen["cv_membership_sha256"][
+                    f"pooled_fold_{fold}_validation"
+                ],
+                "rta_config_sha256": config_hash,
+                "a2_config_sha256": a2_hash,
+                "semantic_cache_sha256": cache_identity,
+                "rta_revision": MODEL_REVISION,
+                "rta_representation": REPRESENTATION,
+                "lexical_representation_id": method["representation_id"],
+            }
+            _status(
+                status_path,
+                current_phase=f"competitive:{task}:fold-{fold}",
+                completed_competitive_fits=sum(row.get("status") == "SUCCESS" for row in results),
+            )
+            lexical = build_sparse_features(
+                variant["representation"],
+                [rows[value].text for value in train_ids],
+                [rows[value].text for value in validation_ids],
+                _feature_config(a2_config, variant),
+            )
+            features = fuse_sparse_features(
+                lexical,
+                embeddings[[index[value] for value in train_ids]],
+                embeddings[[index[value] for value in validation_ids]],
+                1.0,
+            )
+            result = _run_fit(
+                task=task,
+                fold=fold,
+                features=features,
+                train_ids=train_ids,
+                validation_ids=validation_ids,
+                rows=rows,
+                protocol=protocol,
+                config=fusion_config,
+                fingerprint=config_hash,
+                provenance=provenance,
+                checkpoint_dir=checkpoint_root,
+                resume=resume,
+            )
+            result["configuration_id"] = f"{task}-A2-RTA"
+            results.append(result)
+            _status(
+                status_path,
+                completed_competitive_fits=sum(row.get("status") == "SUCCESS" for row in results),
+                latest_successful_checkpoint=str(
+                    checkpoint_root / f"{result['experiment_id']}.json"
+                ),
+            )
+            del lexical, features
+            gc.collect()
+    _write_reports(
+        report_dir,
+        results,
+        _aggregate(results),
+        sum(row.get("fit_runtime_seconds", 0) for row in results),
+        {
+            "protocol_sha256": protocol.fingerprint,
+            "development_membership_sha256": development_hash,
+            "rta_config_sha256": config_hash,
+            "semantic_cache_sha256": cache_identity,
+            "rta_revision": MODEL_REVISION,
+            "rta_representation": REPRESENTATION,
+        },
+        references,
+    )
+    successful = sum(row.get("status") == "SUCCESS" for row in results)
+    _status(
+        status_path,
+        state="SUCCESS" if successful == 9 else "FAILED",
+        current_phase="complete",
+        completed_embedding_shards=9,
+        completed_competitive_fits=successful,
+    )
+    return {"successful": successful, "failed": 9 - successful}
+
+
+def finalize_rta_checkpoints(
+    *,
+    protocol_report_dir: Path,
+    reports_root: Path,
+    report_dir: Path,
+    cache_root: Path,
+    checkpoint_root: Path,
+    protocol: FrozenProtocol,
+    config_path: Path | None = None,
+) -> dict[str, Any]:
+    """Validate and report persisted B3 artifacts without encoding or fitting."""
+    config, config_hash = load_rta_config(config_path)
+    references = _verify_references(reports_root)
+    frozen = json.loads((protocol_report_dir / "fingerprints.json").read_text())
+    development_hash = frozen["development_membership_sha256"]
+    if frozen["protocol_sha256"] != protocol.fingerprint:
+        raise BenchmarkError("protocol fingerprint drift")
+    expected_projects = {
+        "BIRT",
+        "CDT",
+        "EQUINOX",
+        "JDT",
+        "MYLYN",
+        "PAPYRUS",
+        "PDE",
+        "PLATFORM",
+        "TPTP",
+    }
+    shard_dir = cache_root / "RTA" / "shards"
+    sidecars = sorted(shard_dir.glob("*.json"))
+    parquets = sorted(shard_dir.glob("*.parquet"))
+    if len(sidecars) != 9 or len(parquets) != 9:
+        raise BenchmarkError("expected exactly nine B3 semantic shards")
+    shard_validation, shard_metadata = [], []
+    all_ids: set[str] = set()
+    for sidecar in sidecars:
+        stored = json.loads(sidecar.read_text())
+        shard = sidecar.with_suffix(".parquet")
+        actual_sha = hashlib.sha256(shard.read_bytes()).hexdigest()
+        checks = {
+            "status_success": stored.get("status") == "SUCCESS",
+            "project_expected": stored.get("project") in expected_projects,
+            "project_filename_matches": stored.get("project") == sidecar.stem,
+            "protocol_matches": stored.get("protocol_sha256") == protocol.fingerprint,
+            "development_matches": stored.get("development_membership_sha256") == development_hash,
+            "config_matches": stored.get("config_sha256") == config_hash,
+            "model_matches": stored.get("model_id") == MODEL_ID,
+            "revision_matches": stored.get("resolved_revision") == MODEL_REVISION,
+            "representation_matches": stored.get("representation") == REPRESENTATION,
+            "normalization_matches": stored.get("normalization") == "L2",
+            "sequence_length_matches": stored.get("max_sequence_length") == MAX_LENGTH,
+            "dimension_matches": stored.get("embedding_dimension") == DIMENSION,
+            "dtype_matches": stored.get("dtype") == "float32",
+            "batch_size_valid": isinstance(stored.get("batch_size"), int)
+            and 1 <= stored["batch_size"] <= config["candidate_batch_size"],
+            "file_checksum_matches": stored.get("sha256") == actual_sha,
+        }
+        ids, embeddings = read_shard(shard, DIMENSION)
+        checks["row_count_matches"] = len(ids) == stored.get("row_count")
+        checks["identities_unique"] = len(ids) == len(set(ids))
+        checks["l2_normalized"] = bool(
+            np.allclose(np.linalg.norm(embeddings, axis=1), 1.0, atol=1e-5)
+        )
+        if not all(checks.values()) or all_ids & set(ids):
+            raise BenchmarkError(f"invalid B3 semantic shard: {sidecar}")
+        all_ids.update(ids)
+        shard_metadata.append(stored)
+        shard_validation.append({"path": str(sidecar), "project": stored["project"], **checks})
+    if {row["project"] for row in shard_validation} != expected_projects:
+        raise BenchmarkError("B3 project shard matrix mismatch")
+    if _membership_fingerprint(all_ids) != development_hash:
+        raise BenchmarkError("B3 semantic cache development membership mismatch")
+    calculated_cache_identity = hashlib.sha256(
+        json.dumps(
+            [(row["project"], row["sha256"]) for row in shard_metadata],
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode()
+    ).hexdigest()
+    cache_metadata = json.loads((cache_root / "RTA" / "metadata.json").read_text())
+    cache_identity = cache_metadata.get("semantic_cache_sha256")
+    cache_checks = {
+        "status_success": cache_metadata.get("status") == "SUCCESS",
+        "identity_matches": cache_identity == calculated_cache_identity,
+        "development_matches": cache_metadata.get("development_membership_sha256")
+        == development_hash,
+        "config_matches": cache_metadata.get("config_sha256") == config_hash,
+        "nine_shards_recorded": len(cache_metadata.get("shards", [])) == 9,
+        "locked_test_not_embedded": cache_metadata.get("locked_test_embedded") is False,
+    }
+    if not all(cache_checks.values()):
+        raise BenchmarkError("invalid B3 semantic cache metadata")
+    provenance = json.loads((report_dir / "model_provenance.json").read_text())
+    provenance_checks = {
+        "model_matches": provenance.get("model_id") == MODEL_ID,
+        "revision_matches": provenance.get("resolved_revision") == MODEL_REVISION,
+        "architecture_matches": provenance.get("architecture") == ARCHITECTURE,
+        "representation_matches": provenance.get("representation") == REPRESENTATION,
+        "dimension_matches": provenance.get("hidden_dimension") == DIMENSION,
+        "trainable_parameters_zero": provenance.get("trainable_parameter_count") == 0,
+        "trust_remote_code_false": provenance.get("trust_remote_code") is False,
+    }
+    if not all(provenance_checks.values()):
+        raise BenchmarkError("invalid B3 frozen-model provenance")
+
+    paths = sorted(checkpoint_root.glob("*.json"))
+    if len(paths) != 9:
+        raise BenchmarkError("expected exactly nine B3 competitive checkpoints")
+    expected_matrix = {(task, fold) for task in TASKS for fold in (1, 2, 3)}
+    seen, runs, fit_validation = set(), [], []
+    for path in paths:
+        run = json.loads(path.read_text())
+        key = (run.get("task"), run.get("fold"))
+        method = config["tasks"].get(key[0], {}) if key[0] in TASKS else {}
+        fold = key[1]
+        train_key = f"pooled_fold_{fold}_training"
+        validation_key = f"pooled_fold_{fold}_validation"
+        checks = {
+            "status_success": run.get("status") == "SUCCESS",
+            "task_fold_expected": key in expected_matrix,
+            "task_fold_unique": key not in seen,
+            "stage_competitive": run.get("stage") == "COMPETITIVE",
+            "protocol_matches": run.get("protocol_sha256") == protocol.fingerprint,
+            "development_matches": run.get("development_membership_sha256") == development_hash,
+            "training_membership_matches": run.get("training_membership_sha256")
+            == frozen["cv_membership_sha256"].get(train_key),
+            "validation_membership_matches": run.get("validation_membership_sha256")
+            == frozen["cv_membership_sha256"].get(validation_key),
+            "config_matches": run.get("rta_config_sha256") == config_hash,
+            "revision_matches": run.get("rta_revision") == MODEL_REVISION,
+            "representation_matches": run.get("rta_representation") == REPRESENTATION,
+            "semantic_cache_matches": run.get("semantic_cache_sha256") == cache_identity,
+            "semantic_weight_matches": run.get("semantic_weight") == config["semantic_weight"],
+            "semantic_dimension_matches": run.get("semantic_feature_count") == DIMENSION,
+            "cv_family_matches": run.get("cv_family") == "pooled",
+            "lexical_representation_matches": run.get("lexical_representation_id")
+            == method.get("representation_id"),
+            "classifier_matches": run.get("classifier") == method.get("classifier"),
+            "class_weight_matches": run.get("class_weight") == method.get("class_weight"),
+            "c_matches": run.get("c") == method.get("c"),
+            "metrics_present": bool(run.get("metrics")),
+        }
+        if not all(checks.values()):
+            raise BenchmarkError(f"invalid B3 competitive checkpoint: {path}")
+        seen.add(key)
+        runs.append(run)
+        fit_validation.append(
+            {
+                "path": str(path),
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                "task": key[0],
+                "fold": key[1],
+                **checks,
+            }
+        )
+    if seen != expected_matrix:
+        raise BenchmarkError("B3 competitive task/fold matrix mismatch")
+
+    fold_rows, class_rows, matrices, task_rows = [], [], {}, []
+    for run in sorted(runs, key=lambda row: (TASKS.index(row["task"]), row["fold"])):
+        metrics = run["metrics"]
+        fold_rows.append(
+            {
+                "task": run["task"],
+                "fold": run["fold"],
+                **{
+                    key: metrics[key]
+                    for key in ("macro_f1", "balanced_accuracy", "accuracy", "weighted_f1")
+                },
+            }
+        )
+        for label, values in metrics["per_class"].items():
+            class_rows.append({"task": run["task"], "fold": run["fold"], "class": label, **values})
+        matrices[f"{run['task']}:fold-{run['fold']}"] = {
+            "task": run["task"],
+            "fold": run["fold"],
+            "labels": list(metrics["per_class"]),
+            "matrix": metrics["confusion_matrix"],
+        }
+    for task in TASKS:
+        selected = [row for row in fold_rows if row["task"] == task]
+        macro = [row["macro_f1"] for row in selected]
+        item = {
+            "task": task,
+            "fold_macro_f1": "|".join(f"{value:.10f}" for value in macro),
+            "mean_macro_f1": statistics.fmean(macro),
+            "std_macro_f1": statistics.pstdev(macro),
+            "mean_balanced_accuracy": statistics.fmean(
+                row["balanced_accuracy"] for row in selected
+            ),
+            "mean_accuracy": statistics.fmean(row["accuracy"] for row in selected),
+            "mean_weighted_f1": statistics.fmean(row["weighted_f1"] for row in selected),
+        }
+        if task == "S2":
+            high = [
+                row for row in class_rows if row["task"] == task and row["class"] == "HIGH_IMPACT"
+            ]
+            item.update(
+                {
+                    "high_impact_precision": statistics.fmean(row["precision"] for row in high),
+                    "high_impact_recall": statistics.fmean(row["recall"] for row in high),
+                    "high_impact_f1": statistics.fmean(row["f1"] for row in high),
+                }
+            )
+            item["legacy_reproduction_guard"] = (
+                "PASS" if item["high_impact_precision"] >= 0.30 else "FAIL"
+            )
+        task_rows.append(item)
+
+    def read_task_rows(relative: str) -> dict[str, dict[str, str]]:
+        with (reports_root / relative).open() as handle:
+            return {row["task"]: row for row in csv.DictReader(handle)}
+
+    b15 = read_task_rows("lexical_semantic_fusion_v1/task_summary.csv")
+    comparison = []
+    for item in task_rows:
+        task = item["task"]
+        current = [float(value) for value in item["fold_macro_f1"].split("|")]
+        previous = [float(value) for value in b15[task]["fold_macro_f1"].split("|")]
+        previous_mean = float(b15[task]["mean_macro_f1"])
+        delta = item["mean_macro_f1"] - previous_mean
+        comparison.append(
+            {
+                "task": task,
+                "b3_fold_macro_f1": item["fold_macro_f1"],
+                "b1_5_fold_macro_f1": b15[task]["fold_macro_f1"],
+                "fold_deltas": "|".join(
+                    f"{a - b:.10f}" for a, b in zip(current, previous, strict=True)
+                ),
+                "b3_mean_macro_f1": item["mean_macro_f1"],
+                "b1_5_mean_macro_f1": previous_mean,
+                "absolute_delta": delta,
+                "relative_delta_percent": delta / previous_mean * 100,
+                "b3_fold_wins": sum(a > b for a, b in zip(current, previous, strict=True)),
+                "new_development_winner": "YES" if delta > 0 else "NO",
+            }
+        )
+
+    systems: dict[str, dict[str, dict[str, str]]] = {
+        "B1.5 hybrid": b15,
+        "B1.6 long-text MPNet fusion": read_task_rows("long_text_fusion_v1/task_summary.csv"),
+        "B2-Lite": read_task_rows("transformer_finetuning_lite_v1/task_summary.csv"),
+    }
+    with (
+        reports_root / "classical_optimization_v1" / "representation_results.csv"
+    ).open() as handle:
+        rows = list(csv.DictReader(handle))
+    systems["A2 classical"] = {
+        task: min((row for row in rows if row["task"] == task), key=lambda row: int(row["rank"]))
+        for task in TASKS
+    }
+    with (reports_root / "semantic_embeddings_v1" / "leaderboard.csv").open() as handle:
+        rows = list(csv.DictReader(handle))
+    systems["B1 frozen MPNet"] = {
+        task: min(
+            (row for row in rows if row["task"] == task and row["encoder_id"] == "E2"),
+            key=lambda row: int(row["rank_within_task"]),
+        )
+        for task in TASKS
+    }
+    experiment_comparison = []
+    current_by_task = {row["task"]: row for row in task_rows}
+    for system, values in systems.items():
+        for task in TASKS:
+            baseline = float(values[task]["mean_macro_f1"])
+            current = current_by_task[task]["mean_macro_f1"]
+            experiment_comparison.append(
+                {
+                    "task": task,
+                    "system": system,
+                    "system_mean_macro_f1": baseline,
+                    "b3_mean_macro_f1": current,
+                    "b3_absolute_delta": current - baseline,
+                    "b3_relative_delta_percent": (current - baseline) / baseline * 100,
+                }
+            )
+
+    report_dir.mkdir(parents=True, exist_ok=True)
+    _write_csv(report_dir / "fold_metrics.csv", fold_rows)
+    _write_csv(report_dir / "task_summary.csv", task_rows)
+    _write_csv(report_dir / "per_class_metrics.csv", class_rows)
+    _write_csv(report_dir / "comparison_with_b1_5.csv", comparison)
+    _write_csv(report_dir / "experiment_comparison.csv", experiment_comparison)
+    atomic_json(report_dir / "confusion_matrices.json", matrices)
+    atomic_json(
+        report_dir / "checkpoint_validation.json",
+        {
+            "status": "PASS",
+            "semantic_shards_validated": 9,
+            "competitive_checkpoints_validated": 9,
+            "competitive_models_refitted": 0,
+            "semantic_embeddings_regenerated": False,
+            "existing_checkpoints_reused": True,
+            "locked_test_accessed": False,
+            "cache_metadata": cache_checks,
+            "model_provenance": provenance_checks,
+            "shards": shard_validation,
+            "fits": fit_validation,
+        },
+    )
+    environment = json.loads((report_dir / "environment.json").read_text())
+    environment.update(
+        {
+            "reference_sha256": references,
+            "rta_fine_tuned": False,
+            "peft_used": False,
+            "semantic_embeddings_regenerated_during_finalization": False,
+            "competitive_models_refitted_during_finalization": 0,
+            "existing_checkpoints_reused": True,
+            "locked_test_tokenized": False,
+            "locked_test_embedded": False,
+            "locked_test_model_performance_accessed": False,
+            "locked_test_used_for_tuning": False,
+            "final_locked_test_evaluation_started": False,
+        }
+    )
+    atomic_json(report_dir / "environment.json", environment)
+    lines = [
+        "# Phase B3 Frozen-RTA Lexical–Semantic Fusion Report",
+        "",
+        (
+            "Phase B3 reused nine persisted DEVELOPMENT-only checkpoints; no semantic "
+            "embedding was regenerated and no competitive model was refitted."
+        ),
+        "",
+        "## Frozen method",
+        "",
+        f"- Model: `{MODEL_ID}` at revision `{MODEL_REVISION}`",
+        (
+            f"- Representation: `{REPRESENTATION}`, {DIMENSION} dimensions, L2 normalized, "
+            "semantic weight 1.0"
+        ),
+        "- Base encoder frozen: yes; PEFT: no; locked test accessed: no",
+        "",
+        "## Development results",
+        "",
+        "| Task | Fold macro-F1 | Mean | Std | B1.5 mean | Delta | B3 fold wins |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    compare_by_task = {row["task"]: row for row in comparison}
+    for item in task_rows:
+        prior = compare_by_task[item["task"]]
+        lines.append(
+            f"| {item['task']} | {item['fold_macro_f1']} | {item['mean_macro_f1']:.10f} | "
+            f"{item['std_macro_f1']:.10f} | {prior['b1_5_mean_macro_f1']:.10f} | "
+            f"{prior['absolute_delta']:+.10f} | {prior['b3_fold_wins']}/3 |"
+        )
+    lines += ["", "## Interpretation", ""]
+    for row in comparison:
+        direction = "improves on" if row["absolute_delta"] > 0 else "does not improve on"
+        lines.append(
+            f"- {row['task']}: B3 {direction} B1.5 by {row['absolute_delta']:+.10f} macro-F1 "
+            f"({row['relative_delta_percent']:+.3f}%)."
+        )
+    lines += [
+        "",
+        "B1.5 remains the development winner for S6, S3, and S2.",
+        "",
+        "## Secondary comparisons",
+        "",
+        "| Task | Comparator | Comparator mean | B3 mean | B3 delta |",
+        "|---|---|---:|---:|---:|",
+    ]
+    for row in experiment_comparison:
+        if row["system"] != "B1.5 hybrid":
+            lines.append(
+                f"| {row['task']} | {row['system']} | {row['system_mean_macro_f1']:.10f} | "
+                f"{row['b3_mean_macro_f1']:.10f} | {row['b3_absolute_delta']:+.10f} |"
+            )
+    lines += [
+        "",
+        "## Integrity",
+        "",
+        (
+            "All nine semantic shards and all nine S6/S3/S2 × folds 1/2/3 checkpoints "
+            "passed fingerprint, membership, method, checksum, frozen-model, and "
+            "locked-test guards."
+        ),
+        "",
+    ]
+    (report_dir / "RTA_FUSION_REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+    return {"tasks": task_rows, "comparison": comparison, "successful": 9, "refitted": 0}
 
 
 def run_rta_feasibility(

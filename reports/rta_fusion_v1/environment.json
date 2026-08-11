@@ -1,25 +1,34 @@
 {
-  "competitive_fits_started": 0,
-  "config_sha256": "61dfcdd67e925f77bcb233df6496387bb1e87aa63d89beda25fe2b70351cefd9",
-  "device": "mps",
-  "dtype": "float32",
-  "full_rta_embeddings_materialized": false,
-  "full_run_started": false,
+  "competitive_models_refitted_during_finalization": 0,
+  "development_membership_sha256": "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f",
+  "existing_checkpoints_reused": true,
+  "final_locked_test_evaluation_started": false,
+  "locked_test_accessed": false,
   "locked_test_embedded": false,
   "locked_test_model_performance_accessed": false,
   "locked_test_tokenized": false,
   "locked_test_used_for_tuning": false,
-  "mps_is_available": true,
-  "mps_is_built": true,
   "packages": {
-    "huggingface-hub": "1.27.0",
     "numpy": "2.5.2",
     "pyarrow": "21.0.0",
-    "torch": "2.13.0",
-    "transformers": "5.14.1"
+    "scikit-learn": "1.8.0",
+    "scipy": "1.18.0"
   },
   "peft_used": false,
   "platform": "macOS-26.6.1-arm64-arm-64bit",
+  "protocol_sha256": "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda",
   "python": "3.12.13",
-  "rta_fine_tuned": false
+  "reference_sha256": {
+    "A2_REPORT": "4ab436dc330e80a66a1cea5dcfb9c364c8d6f947c4d8f757fd25486c0ecd2a8d",
+    "B15_REPORT": "e7bcf9afe11ac5b29f0ff0996c5c011351684164048c7afd871062e242bd99c7",
+    "B16_REPORT": "86278c1a10ce2980179fa9d20d95679e6541d57f6d0a8cfb19d06a02a4573c21",
+    "B1_REPORT": "7809d204c0f4b85eb162c071742bf92a6d7d078b355c76537ffb382fc4f09804"
+  },
+  "rta_config_sha256": "61dfcdd67e925f77bcb233df6496387bb1e87aa63d89beda25fe2b70351cefd9",
+  "rta_fine_tuned": false,
+  "rta_representation": "base_encoder_final_layer_first_token",
+  "rta_revision": "56cc614ee7cf17b8c1875e6848037f9e5bafc41a",
+  "runtime_seconds": 9521.573700542009,
+  "semantic_cache_sha256": "b6695c5bf5bc580405ef543034980831a23711ce968bf84c3e1dcd8e80afb3f0",
+  "semantic_embeddings_regenerated_during_finalization": false
 }
