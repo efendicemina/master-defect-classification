@@ -95,6 +95,31 @@ def test_encoder_is_frozen_and_estimate_cannot_fit_classifier():
     assert "run_fusion_benchmark" not in runner
 
 
+def test_full_path_has_shard_and_competitive_resume_guards():
+    from defect_classifier import long_text_embeddings
+
+    source = inspect.getsource(long_text_embeddings.run_long_text_full)
+    assert "sidecar.is_file()" in source
+    assert "long-text shard provenance drift" in source
+    assert "read_shard" in source
+    assert "resume=resume" in source
+    assert "_load_fold(" in source
+    assert "_temporal_folds" not in source
+    assert "data/locked" not in source
+    assert "locked_test_accessed=False" in source
+
+
+def test_finalization_cannot_encode_or_fit():
+    from defect_classifier import long_text_embeddings
+
+    source = inspect.getsource(long_text_embeddings.finalize_long_text_checkpoints)
+    assert "encode_long_documents(" not in source
+    assert "_run_fit(" not in source
+    assert "build_sparse_features(" not in source
+    assert "locked_test_tokenized" in source
+    assert 'run.get("status") == "SUCCESS"' in source
+
+
 def test_reference_reports_unchanged():
     root = Path(__file__).resolve().parents[1] / "reports"
     for _, (relative, expected) in REFERENCE_HASHES.items():

@@ -1,27 +1,22 @@
 {
-  "competitive_fits_started": 0,
-  "config_sha256": "646fc17a0e27f2310b6acb488d50d7a594be2e3a8987af0f2a79cd22e0b6254d",
+  "competitive_models_refitted_during_finalization": 0,
   "development_membership_sha256": "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f",
-  "device": "mps",
-  "dtype": "float32",
-  "full_long_text_embeddings_materialized": false,
-  "full_run_started": false,
+  "existing_checkpoints_reused": true,
+  "final_locked_test_evaluation_started": false,
+  "locked_test_accessed": false,
   "locked_test_embedded": false,
   "locked_test_model_performance_accessed": false,
   "locked_test_tokenized": false,
-  "model_id": "sentence-transformers/all-mpnet-base-v2",
-  "mps_driver_allocated_bytes_after": 3238772736,
-  "mps_is_available": true,
-  "mps_is_built": true,
+  "locked_test_used_for_tuning": false,
+  "long_text_config_sha256": "646fc17a0e27f2310b6acb488d50d7a594be2e3a8987af0f2a79cd22e0b6254d",
+  "mpnet_revision": "e8c3b32edf5434bc2275fc9bab85f82640a19130",
   "packages": {
     "numpy": "2.5.2",
     "pyarrow": "21.0.0",
-    "sentence-transformers": "5.7.0",
-    "torch": "2.13.0",
-    "transformers": "5.14.1"
+    "scikit-learn": "1.8.0",
+    "scipy": "1.18.0"
   },
   "platform": "macOS-26.6.1-arm64-arm-64bit",
-  "process_peak_rss_bytes": 1049739264,
   "protocol_sha256": "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda",
   "python": "3.12.13",
   "reference_sha256": {
@@ -29,5 +24,7 @@
     "B15_REPORT": "e7bcf9afe11ac5b29f0ff0996c5c011351684164048c7afd871062e242bd99c7",
     "B1_REPORT": "7809d204c0f4b85eb162c071742bf92a6d7d078b355c76537ffb382fc4f09804"
   },
-  "resolved_revision": "e8c3b32edf5434bc2275fc9bab85f82640a19130"
+  "runtime_seconds": 2554.679213876967,
+  "semantic_cache_sha256": "199b443ffdd9b7ef7622063c760cd69558f0333f27e5d2239eeb7f42d904ab8b",
+  "semantic_embeddings_regenerated_during_finalization": false
 }
