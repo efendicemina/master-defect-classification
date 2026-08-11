@@ -22,6 +22,7 @@ dev = [
 ]
 semantic = [
   "accelerate>=1.10,<2",
+  "peft==0.19.1",
   "protobuf>=6,<7",
   "sentencepiece>=0.2,<1",
   "torch>=2.8,<3",

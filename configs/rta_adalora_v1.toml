@@ -1,0 +1,68 @@
+experiment_id = "rta-adalora-v1"
+seed = 20260809
+model_id = "Colorful/RTA"
+resolved_revision = "56cc614ee7cf17b8c1875e6848037f9e5bafc41a"
+architecture = "RobertaForSequenceClassification"
+peft_method = "ADALORA"
+peft_version = "0.19.1"
+max_length = 512
+text_view = "SUMMARY_DESCRIPTION"
+epochs = 3
+optimizer = "AdamW"
+learning_rate = 0.0001
+weight_decay = 0.01
+warmup_fraction = 0.06
+lr_schedule = "linear"
+max_grad_norm = 1.0
+early_stopping = false
+final_epoch_selection = 3
+focal_gamma = 2.0
+class_weighting = "balanced_train_only_mean_one"
+effective_batch_size = 32
+train_micro_batch_candidates = [8, 4, 2]
+inference_batch_size = 16
+init_r = 12
+target_r = 8
+lora_alpha = 16
+lora_dropout = 0.05
+bias = "none"
+target_modules = ["query", "value"]
+modules_to_save = ["classifier"]
+tinit_fraction = 0.10
+tfinal_fraction = 0.20
+allocation_target_updates = 100
+semantic_weight = 1.0
+future_outputs = ["DIRECT_CLASSIFIER", "LEXICAL_FUSION"]
+
+[feasibility]
+stage = "ENGINEERING_ONLY"
+task = "S2"
+fold = 1
+training_rows = 10000
+inference_rows = 1000
+
+[future_matrix]
+tasks = ["S6", "S3", "S2"]
+folds = [1, 2, 3]
+adapter_count = 9
+
+[lexical.S6]
+representation_id = "S6-R3"
+representation = "CHAR"
+classifier = "LINEARSVC"
+class_weight = "BALANCED"
+c = 0.25
+
+[lexical.S3]
+representation_id = "S3-R5"
+representation = "WORD"
+classifier = "LOGREG"
+class_weight = "BALANCED"
+c = 2.0
+
+[lexical.S2]
+representation_id = "S2-R3"
+representation = "WORD_CHAR"
+classifier = "LOGREG"
+class_weight = "BALANCED"
+c = 2.0

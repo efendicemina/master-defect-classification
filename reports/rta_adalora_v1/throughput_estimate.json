@@ -1,0 +1,57 @@
+{
+  "inference": {
+    "documents_per_second": 23.985229128561432,
+    "embedding_dimension": 768,
+    "inference_batch_size": 16,
+    "inference_rows": 1000,
+    "representation": "adapted_encoder_final_layer_first_token_l2",
+    "runtime_seconds": 41.69232633300999,
+    "tokens_per_second": 4078.760168999257
+  },
+  "training": {
+    "adapter_checkpoint_size_bytes": 3570705,
+    "class_weights": {
+      "HIGH_IMPACT": 1.6516,
+      "LOWER_IMPACT": 0.3484
+    },
+    "effective_batch_size": 32,
+    "epoch_diagnostics": [
+      {
+        "epoch": 1,
+        "optimizer_steps_completed": 313,
+        "training_loss": 0.09853683148920536,
+        "training_seconds": 2272.474322041002
+      },
+      {
+        "epoch": 2,
+        "optimizer_steps_completed": 626,
+        "training_loss": 0.09551404910087585,
+        "training_seconds": 1395.8220737910015
+      },
+      {
+        "epoch": 3,
+        "optimizer_steps_completed": 939,
+        "training_loss": 0.09389656879901886,
+        "training_seconds": 1176.149373082997
+      }
+    ],
+    "example_exposures": 30000,
+    "example_exposures_per_second": 6.192610612397237,
+    "gradient_accumulation": 4,
+    "mps_current_allocated_bytes": 502748416,
+    "mps_driver_allocated_bytes": 18350129152,
+    "mps_fallback_events": 0,
+    "nan_inf_events": 0,
+    "oom_events": [],
+    "optimizer_steps": 939,
+    "optimizer_steps_per_second": 0.19382871216803352,
+    "peak_process_rss_bytes": 2254798848,
+    "process_rss_after_training_bytes": 236961792,
+    "process_rss_before_training_bytes": 1223868416,
+    "selected_micro_batch": 8,
+    "tokenization_runtime_seconds": 2.1982260000077076,
+    "tokens_per_second": 1176.0318695286855,
+    "training_runtime_seconds": 4844.483510709004,
+    "warmup_steps": 56
+  }
+}

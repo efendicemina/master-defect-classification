@@ -25,6 +25,7 @@ from defect_classifier.long_text_embeddings import (
 )
 from defect_classifier.preparation import PreparationError, prepare_protocol_v1
 from defect_classifier.protocol import ProtocolError, load_protocol
+from defect_classifier.rta_adalora import mark_feasibility_failed, run_adalora_feasibility
 from defect_classifier.rta_fusion import finalize_rta_checkpoints, run_rta_feasibility, run_rta_full
 from defect_classifier.semantic_pipeline import run_semantic_pipeline
 from defect_classifier.transformer_finetuning import run_b2_pipeline
@@ -197,9 +198,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     rta.add_argument("--protocol", type=Path, help="override protocol config")
     rta.add_argument("--config", type=Path, help="override B3 config")
-    rta.add_argument(
-        "--stage", choices=("feasibility", "full", "finalize"), default="feasibility"
-    )
+    rta.add_argument("--stage", choices=("feasibility", "full", "finalize"), default="feasibility")
     rta.add_argument(
         "--development-dir", type=Path, default=Path("data/processed/protocol_v1/development")
     )
@@ -212,6 +211,21 @@ def build_parser() -> argparse.ArgumentParser:
     rta.add_argument("--cache-root", type=Path, default=Path("data/processed/rta_embeddings_v1"))
     rta.add_argument("--checkpoint-root", type=Path, default=Path("data/processed/rta_fusion_v1"))
     rta.add_argument("--resume", action=argparse.BooleanOptionalAction, default=True)
+    adalora = subparsers.add_parser(
+        "run-rta-adalora-feasibility",
+        help="run one development-TRAIN-only Phase B4 AdaLoRA engineering benchmark",
+    )
+    adalora.add_argument("--protocol", type=Path, help="override protocol config")
+    adalora.add_argument("--config", type=Path, help="override B4 config")
+    adalora.add_argument("--stage", choices=("feasibility",), default="feasibility")
+    adalora.add_argument(
+        "--development-dir", type=Path, default=Path("data/processed/protocol_v1/development")
+    )
+    adalora.add_argument(
+        "--manifest-dir", type=Path, default=Path("data/processed/protocol_v1/cv_manifests")
+    )
+    adalora.add_argument("--protocol-report-dir", type=Path, default=Path("reports/protocol_v1"))
+    adalora.add_argument("--report-dir", type=Path, default=Path("reports/rta_adalora_v1"))
     transformer = subparsers.add_parser(
         "run-transformer-finetuning",
         help="run development-only Phase B2 controlled DeBERTa fine-tuning",
@@ -277,6 +291,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     print(f"Python: {platform.python_version()} ({sys.executable})")
     print(f"Platform: {platform.platform()}")
+    if args.command == "run-rta-adalora-feasibility":
+        try:
+            result = run_adalora_feasibility(
+                development_dir=args.development_dir.resolve(),
+                manifest_dir=args.manifest_dir.resolve(),
+                protocol_report_dir=args.protocol_report_dir.resolve(),
+                report_dir=args.report_dir.resolve(),
+                protocol=load_protocol(args.protocol),
+                config_path=args.config,
+                stage=args.stage,
+            )
+        except (ProtocolError, BenchmarkError, OSError, KeyError, RuntimeError) as exc:
+            mark_feasibility_failed(args.report_dir.resolve(), exc)
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(f"Engineering subset rows: {result['subset_rows']}")
+        return 0
     if args.command == "run-rta-fusion":
         try:
             if args.stage == "finalize":

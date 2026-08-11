@@ -1,0 +1,96 @@
+{
+  "adalora_training_seconds": 452507.7023880937,
+  "adapted_embedding_extraction_seconds": 57680.374558213654,
+  "adapter_checkpoint_size_bytes": 3570705,
+  "central_total_seconds": 530956.273329046,
+  "checkpoint_reporting_overhead_seconds": 300.0,
+  "conservative_total_seconds": 716790.9689942121,
+  "direct_classifier_validation_inference_seconds": 18736.90668499168,
+  "folds": [
+    {
+      "fold": 1,
+      "projected_direct_inference_seconds": 2095.28955219175,
+      "projected_embedding_seconds": 4258.746057937971,
+      "projected_training_seconds": 25138.50938542009,
+      "task": "S6",
+      "training_rows": 51891,
+      "validation_rows": 50256
+    },
+    {
+      "fold": 2,
+      "projected_direct_inference_seconds": 2071.149695244937,
+      "projected_embedding_seconds": 6398.271168369045,
+      "projected_training_seconds": 50279.44101259553,
+      "task": "S6",
+      "training_rows": 103787,
+      "validation_rows": 49677
+    },
+    {
+      "fold": 3,
+      "projected_direct_inference_seconds": 2079.196314227208,
+      "projected_embedding_seconds": 8569.774293097536,
+      "projected_training_seconds": 75417.95039801563,
+      "task": "S6",
+      "training_rows": 155678,
+      "validation_rows": 49870
+    },
+    {
+      "fold": 1,
+      "projected_direct_inference_seconds": 2095.28955219175,
+      "projected_embedding_seconds": 4258.746057937971,
+      "projected_training_seconds": 25138.50938542009,
+      "task": "S3",
+      "training_rows": 51891,
+      "validation_rows": 50256
+    },
+    {
+      "fold": 2,
+      "projected_direct_inference_seconds": 2071.149695244937,
+      "projected_embedding_seconds": 6398.271168369045,
+      "projected_training_seconds": 50279.44101259553,
+      "task": "S3",
+      "training_rows": 103787,
+      "validation_rows": 49677
+    },
+    {
+      "fold": 3,
+      "projected_direct_inference_seconds": 2079.196314227208,
+      "projected_embedding_seconds": 8569.774293097536,
+      "projected_training_seconds": 75417.95039801563,
+      "task": "S3",
+      "training_rows": 155678,
+      "validation_rows": 49870
+    },
+    {
+      "fold": 1,
+      "projected_direct_inference_seconds": 2095.28955219175,
+      "projected_embedding_seconds": 4258.746057937971,
+      "projected_training_seconds": 25138.50938542009,
+      "task": "S2",
+      "training_rows": 51891,
+      "validation_rows": 50256
+    },
+    {
+      "fold": 2,
+      "projected_direct_inference_seconds": 2071.149695244937,
+      "projected_embedding_seconds": 6398.271168369045,
+      "projected_training_seconds": 50279.44101259553,
+      "task": "S2",
+      "training_rows": 103787,
+      "validation_rows": 49677
+    },
+    {
+      "fold": 3,
+      "projected_direct_inference_seconds": 2079.196314227208,
+      "projected_embedding_seconds": 8569.774293097536,
+      "projected_training_seconds": 75417.95039801563,
+      "task": "S2",
+      "training_rows": 155678,
+      "validation_rows": 49870
+    }
+  ],
+  "lexical_fusion_fit_prediction_seconds": 1731.2896977470014,
+  "nine_adapter_storage_bytes": 32136345,
+  "safety_margin": "35% over central projection",
+  "scaling_method": "measured exposure and inference throughput applied to exact frozen CV sizes"
+}
