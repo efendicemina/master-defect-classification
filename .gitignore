@@ -67,3 +67,5 @@ data/processed/transformer_lite_checkpoints_v1/
 reports/long_text_fusion_v1/.work/
 reports/rta_fusion_v1/.work/
 reports/rta_adalora_v1/.work/
+reports/rta_adalora_multitask_v1/.work/
+reports/rta_adalora_multitask_optimization_v1/.work/

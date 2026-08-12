@@ -12,9 +12,12 @@ import statistics
 import time
 import tomllib
 from collections import Counter
+from enum import Enum
 from importlib.metadata import version
 from pathlib import Path
 from typing import Any
+
+import numpy as np
 
 from defect_classifier.classical_benchmark import BenchmarkError
 from defect_classifier.preparation import _membership_fingerprint
@@ -200,10 +203,45 @@ def future_adapter_matrix() -> tuple[tuple[str, int], ...]:
     return tuple((task, fold) for task in TASKS for fold in FOLDS)
 
 
+def json_safe(value: Any, *, path: str = "$") -> Any:
+    """Recursively convert intended report values to bounded JSON-native values."""
+    if value is None or isinstance(value, str | int | float | bool):
+        return value
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, Enum):
+        return json_safe(value.value, path=path)
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, np.ndarray):
+        if value.size > 100_000:
+            raise BenchmarkError(f"refusing to serialize large NumPy array at {path}")
+        return value.tolist()
+    try:
+        import torch
+
+        if isinstance(value, torch.Tensor):
+            detached = value.detach().cpu()
+            if detached.numel() == 1:
+                return detached.item()
+            if detached.numel() > 100_000:
+                raise BenchmarkError(f"refusing to serialize large tensor at {path}")
+            return detached.tolist()
+    except ImportError:
+        pass
+    if isinstance(value, dict):
+        return {str(key): json_safe(item, path=f"{path}.{key}") for key, item in value.items()}
+    if isinstance(value, list | tuple):
+        return [json_safe(item, path=f"{path}[{index}]") for index, item in enumerate(value)]
+    raise BenchmarkError(f"unsupported report value at {path}: {type(value).__name__}")
+
+
 def _atomic_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.tmp")
-    temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temporary.write_text(
+        json.dumps(json_safe(value), indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     os.replace(temporary, path)
 
 

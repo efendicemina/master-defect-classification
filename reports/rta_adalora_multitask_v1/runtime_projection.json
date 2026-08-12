@@ -1,0 +1,53 @@
+{
+  "central_total_seconds": 232117.7261191782,
+  "checkpoint_size_per_fold_bytes": 8324109,
+  "conservative_total_seconds": 313358.9302608906,
+  "folds": [
+    {
+      "central_fold_wall_seconds": 39649.93089902585,
+      "checkpoint_reporting_seconds": 100.0,
+      "combined_validation_forward_seconds": 2226.233851060321,
+      "fold": 1,
+      "lexical_fusion_fit_prediction_seconds": 83.1461101660002,
+      "shared_adalora_training_seconds": 34941.89006615493,
+      "train_embedding_extraction_seconds": 2298.660871644602,
+      "training_rows": 51891,
+      "validation_rows": 50256
+    },
+    {
+      "central_fold_wall_seconds": 76978.26434707892,
+      "checkpoint_reporting_seconds": 100.0,
+      "combined_validation_forward_seconds": 2200.585383220383,
+      "fold": 2,
+      "lexical_fusion_fit_prediction_seconds": 192.9887443329999,
+      "shared_adalora_training_seconds": 69887.14698687675,
+      "train_embedding_extraction_seconds": 4597.543232648789,
+      "training_rows": 103787,
+      "validation_rows": 49677
+    },
+    {
+      "central_fold_wall_seconds": 115489.53087307343,
+      "checkpoint_reporting_seconds": 100.0,
+      "combined_validation_forward_seconds": 2209.1348725003622,
+      "fold": 3,
+      "lexical_fusion_fit_prediction_seconds": 1455.1548432480013,
+      "shared_adalora_training_seconds": 104829.03705303167,
+      "train_embedding_extraction_seconds": 6896.204104293391,
+      "training_rows": 155678,
+      "validation_rows": 49870
+    }
+  ],
+  "safety_margin": "35% over measured-throughput central projection",
+  "shared_embedding_extractions_per_fold": 1,
+  "temporary_embedding_storage_by_fold_bytes": {
+    "1": 313795584,
+    "2": 471441408,
+    "3": 631443456
+  },
+  "three_fold_checkpoint_storage_bytes": 24972327,
+  "total_adapted_embedding_inference_seconds": 20428.36231536785,
+  "total_checkpoint_reporting_seconds": 300.0,
+  "total_lexical_fusion_seconds": 1731.2896977470014,
+  "total_transformer_training_seconds": 209658.07410606334,
+  "transformer_training_runs": 3
+}

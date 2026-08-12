@@ -1,0 +1,117 @@
+{
+  "adalora_schedule": {
+    "deltaT": 7,
+    "formula": "tinit=round(0.10*total_step); tfinal=round(0.20*total_step); deltaT=max(1,round(max(1,total_step-tinit-tfinal)/100))",
+    "tfinal": 188,
+    "tinit": 94,
+    "total_step": 939
+  },
+  "allocation_target_updates": 100,
+  "architecture": "RobertaForSequenceClassification",
+  "bias": "none",
+  "class_weighting": "balanced_train_only_mean_one",
+  "dtype": "float32",
+  "early_stopping": false,
+  "effective_batch_size": 32,
+  "epochs": 3,
+  "experiment_id": "rta-adalora-multitask-v1",
+  "feasibility": {
+    "b4_subset_sha256": "d3b5a5f646e66d2c05fc26f4051b6abca6e15a0af80fce8baf604516f5aebad4",
+    "fold": 1,
+    "inference_rows": 1000,
+    "reuse_b4_subset": true,
+    "stage": "ENGINEERING_ONLY",
+    "training_rows": 10000
+  },
+  "final_epoch_selection": 3,
+  "focal_gamma": 2.0,
+  "future_direct_outputs": [
+    "S6",
+    "S3",
+    "S2"
+  ],
+  "future_fusion_outputs": [
+    "S6",
+    "S3",
+    "S2"
+  ],
+  "future_matrix": {
+    "folds": [
+      1,
+      2,
+      3
+    ],
+    "shared_adapter_count": 3
+  },
+  "heads": {
+    "S2": 2,
+    "S3": 3,
+    "S6": 6
+  },
+  "inference_batch_size": 16,
+  "init_r": 12,
+  "learning_rate": 0.0001,
+  "lexical": {
+    "S2": {
+      "c": 2.0,
+      "class_weight": "BALANCED",
+      "classifier": "LOGREG",
+      "representation": "WORD_CHAR",
+      "representation_id": "S2-R3"
+    },
+    "S3": {
+      "c": 2.0,
+      "class_weight": "BALANCED",
+      "classifier": "LOGREG",
+      "representation": "WORD",
+      "representation_id": "S3-R5"
+    },
+    "S6": {
+      "c": 0.25,
+      "class_weight": "BALANCED",
+      "classifier": "LINEARSVC",
+      "representation": "CHAR",
+      "representation_id": "S6-R3"
+    }
+  },
+  "lora_alpha": 16,
+  "lora_dropout": 0.05,
+  "lr_schedule": "linear",
+  "max_grad_norm": 1.0,
+  "max_length": 512,
+  "model_id": "Colorful/RTA",
+  "modules_to_save": [
+    "classifier"
+  ],
+  "optimizer": "AdamW",
+  "peft_method": "ADALORA",
+  "peft_version": "0.19.1",
+  "resolved_effective_batch_size": 32,
+  "resolved_gradient_accumulation": 4,
+  "resolved_revision": "56cc614ee7cf17b8c1875e6848037f9e5bafc41a",
+  "resolved_train_micro_batch": 8,
+  "seed": 20260809,
+  "semantic_weight": 1.0,
+  "shared_embedding_extractions_per_fold": 1,
+  "steps_per_epoch": 313,
+  "target_modules": [
+    "query",
+    "value"
+  ],
+  "target_r": 8,
+  "task_loss_weights": [
+    0.3333333333333333,
+    0.3333333333333333,
+    0.3333333333333333
+  ],
+  "text_view": "SUMMARY_DESCRIPTION",
+  "tfinal_fraction": 0.2,
+  "tinit_fraction": 0.1,
+  "train_micro_batch_candidates": [
+    8,
+    4,
+    2
+  ],
+  "warmup_fraction": 0.06,
+  "weight_decay": 0.01
+}

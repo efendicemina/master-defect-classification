@@ -1,4 +1,7 @@
 import inspect
+import json
+from enum import Enum
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -21,6 +24,7 @@ from defect_classifier.rta_adalora import (
     balanced_mean_one_weights,
     deterministic_stratified_subset,
     future_adapter_matrix,
+    json_safe,
     load_adalora_config,
     run_adalora_feasibility,
     validate_adalora_config,
@@ -127,3 +131,35 @@ def test_peft_injection_freezes_base_and_saves_classifier_by_construction():
     assert "parameter.requires_grad_(False)" in source
     assert "attention.self" in source
     assert "trainable-parameter boundary drift" in source
+
+
+def test_json_safe_recursively_serializes_report_value_types():
+    torch = pytest.importorskip("torch")
+
+    class Example(Enum):
+        VALUE = "value"
+
+    value = {
+        "scalar_tensor": torch.tensor(True),
+        "vector_tensor": torch.tensor([1.0, 2.0]),
+        "numpy_scalar": np.int64(3),
+        "numpy_array": np.array([4, 5]),
+        "path": Path("report.json"),
+        "enum": Example.VALUE,
+    }
+    converted = json_safe(value)
+    assert converted == {
+        "scalar_tensor": True,
+        "vector_tensor": [1.0, 2.0],
+        "numpy_scalar": 3,
+        "numpy_array": [4, 5],
+        "path": "report.json",
+        "enum": "value",
+    }
+    json.dumps(converted)
+
+
+def test_json_safe_rejects_large_tensor_reports():
+    torch = pytest.importorskip("torch")
+    with pytest.raises(BenchmarkError, match="large tensor"):
+        json_safe({"weights": torch.zeros(100_001)})

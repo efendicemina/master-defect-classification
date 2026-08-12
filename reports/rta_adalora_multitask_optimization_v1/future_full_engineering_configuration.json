@@ -1,0 +1,14 @@
+{
+  "competitive_mode_enabled": false,
+  "deterministic_length_bucketing": true,
+  "dtype": "bfloat16",
+  "dynamic_padding": true,
+  "effective_batch_size": 32,
+  "epochs": 3,
+  "fingerprint": "cfa1badf2054d2cee28afc98ef3c5feb6b0b24c4bbe79eb4c5ae7e5d80161504",
+  "gradient_accumulation": 4,
+  "max_length": 512,
+  "micro_batch": 8,
+  "pad_to_multiple_of": 8,
+  "scientific_configuration_changed": false
+}

@@ -1,0 +1,94 @@
+{
+  "baseline_feasibility_epoch_timings_seconds": {
+    "epoch_1": 4282.628444000002,
+    "epoch_2": 1213.8437035420066,
+    "epoch_3": 1237.195735250003
+  },
+  "baseline_old_projection": {
+    "central_hours": 64.477,
+    "central_seconds_exact_from_artifact": 232117.7261191782,
+    "central_hours_exact_from_artifact": 64.47714614421616
+  },
+  "corrected_original_b4h_projection": {
+    "central_total_hours": 40.58412597572378,
+    "central_total_seconds": 146102.85351260562,
+    "conservative_total_hours": 54.788570067227106,
+    "conservative_total_seconds": 197238.85224101756,
+    "engineering_category": "PRACTICAL",
+    "folds": [
+      {
+        "central_fold_hours": 7.456439634785652,
+        "central_fold_seconds": 26843.182685228347,
+        "fold": 1,
+        "non_training_components_hours": 1.3077891202419232,
+        "training_hours": 6.148650514543729,
+        "training_rows": 51891,
+        "validation_rows": 50256
+      },
+      {
+        "central_fold_hours": 13.4183696166367,
+        "central_fold_seconds": 48306.13061989212,
+        "fold": 2,
+        "non_training_components_hours": 1.969754822278381,
+        "training_hours": 11.448614794358317,
+        "training_rows": 103787,
+        "validation_rows": 49677
+      },
+      {
+        "central_fold_hours": 19.709316724301424,
+        "central_fold_seconds": 70953.54020748513,
+        "fold": 3,
+        "non_training_components_hours": 2.961248283344932,
+        "training_hours": 16.74806844095649,
+        "training_rows": 155678,
+        "validation_rows": 49870
+      }
+    ],
+    "hours_saved_vs_old_64_477": 23.892874024276225,
+    "runtime_reduction_percent_vs_old_64_477": 37.05642946209691,
+    "total_embedding_inference_hours": 5.6745450876021805,
+    "total_lexical_fusion_hours": 0.4809138049297226,
+    "total_reporting_overhead_hours": 0.08333333333333333,
+    "total_transformer_training_hours": 34.34533374985854
+  },
+  "estimator": {
+    "estimated_startup_overhead_seconds_per_fold": 3057.108724603997,
+    "formula": "steady_epoch_seconds=mean(epoch2_seconds,epoch3_seconds); startup_seconds=epoch1_seconds-steady_epoch_seconds; steady_examples_per_second=10000/steady_epoch_seconds; fold_training_seconds=startup_seconds+(3*training_rows/steady_examples_per_second)",
+    "justification": "B4-H-O showed first-use startup was included in B4-H epoch 1, but persisted evidence cannot isolate kernel compilation, graph setup, memory allocation, or AdaLoRA allocation. Epochs 2 and 3 are the only persisted steady-state training evidence for the original configuration.",
+    "steady_epoch_seconds": 1225.5197193960048,
+    "steady_examples_per_second": 8.159803421954305
+  },
+  "locked_test_accessed": false,
+  "non_training_components_source": "Original B4-H feasibility runtime_projection.json values were reused for adapted train embedding extraction, combined validation forward, lexical fusion, and checkpoint/reporting overhead.",
+  "optimization_candidates": {
+    "o1": {
+      "candidate": "O1_DYNAMIC_LENGTH_FLOAT32",
+      "examples_per_second": 0.6763169420523714,
+      "padding_reduction_percent": 62.29,
+      "status": "REJECTED_SLOWER_THAN_ORIGINAL"
+    },
+    "o2": {
+      "candidate": "O2_DYNAMIC_LENGTH_BFLOAT16",
+      "examples_per_second": 1.035119187679197,
+      "padding_reduction_percent": 62.29,
+      "rejected_projection_central_hours": 252.5346930988495,
+      "status": "REJECTED_SLOWER_THAN_ORIGINAL"
+    },
+    "selected_for_future_full_run": "ORIGINAL_B4H_FIXED_PADDING_FLOAT32",
+    "selected_optimization_candidate_is_authorized_for_full_run": false
+  },
+  "prohibitions_confirmed": {
+    "competitive_models_fitted": 0,
+    "full_b4h_run_started": false,
+    "locked_test_embedded": false,
+    "locked_test_model_performance_accessed": false,
+    "locked_test_tokenized": false,
+    "locked_test_used_for_tuning": false,
+    "new_transformer_training_runs": 0,
+    "scientific_configuration_changed": false
+  },
+  "rejected_o2_projection": {
+    "central_hours": 252.535,
+    "central_seconds_exact": 909124.8951558581
+  }
+}

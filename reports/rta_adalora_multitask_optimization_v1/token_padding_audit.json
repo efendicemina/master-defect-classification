@@ -1,0 +1,12 @@
+{
+  "baseline_global_512_padded_tokens": 5120000,
+  "maximum_capped_tokens": 512,
+  "mean_unpadded_tokens": 189.9089,
+  "median_unpadded_tokens": 124.0,
+  "p90_unpadded_tokens": 512.0,
+  "p95_unpadded_tokens": 512.0,
+  "p99_unpadded_tokens": 512.0,
+  "raw_text_persisted": false,
+  "rows": 10000,
+  "tokenization_seconds": 2.27842824999243
+}

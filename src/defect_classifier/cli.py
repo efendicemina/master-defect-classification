@@ -26,6 +26,14 @@ from defect_classifier.long_text_embeddings import (
 from defect_classifier.preparation import PreparationError, prepare_protocol_v1
 from defect_classifier.protocol import ProtocolError, load_protocol
 from defect_classifier.rta_adalora import mark_feasibility_failed, run_adalora_feasibility
+from defect_classifier.rta_adalora_multitask import (
+    mark_feasibility_failed as mark_multitask_feasibility_failed,
+)
+from defect_classifier.rta_adalora_multitask import run_multitask_feasibility
+from defect_classifier.rta_adalora_optimization import (
+    mark_optimization_failed,
+    run_optimization_feasibility,
+)
 from defect_classifier.rta_fusion import finalize_rta_checkpoints, run_rta_feasibility, run_rta_full
 from defect_classifier.semantic_pipeline import run_semantic_pipeline
 from defect_classifier.transformer_finetuning import run_b2_pipeline
@@ -226,6 +234,45 @@ def build_parser() -> argparse.ArgumentParser:
     )
     adalora.add_argument("--protocol-report-dir", type=Path, default=Path("reports/protocol_v1"))
     adalora.add_argument("--report-dir", type=Path, default=Path("reports/rta_adalora_v1"))
+    multitask = subparsers.add_parser(
+        "run-rta-adalora-multitask",
+        help="run development-TRAIN-only B4-H multi-task AdaLoRA feasibility",
+    )
+    multitask.add_argument("--protocol", type=Path, help="override protocol config")
+    multitask.add_argument("--config", type=Path, help="override B4-H config")
+    multitask.add_argument("--stage", choices=("feasibility", "full"), default="feasibility")
+    multitask.add_argument(
+        "--development-dir", type=Path, default=Path("data/processed/protocol_v1/development")
+    )
+    multitask.add_argument(
+        "--manifest-dir", type=Path, default=Path("data/processed/protocol_v1/cv_manifests")
+    )
+    multitask.add_argument("--protocol-report-dir", type=Path, default=Path("reports/protocol_v1"))
+    multitask.add_argument(
+        "--report-dir", type=Path, default=Path("reports/rta_adalora_multitask_v1")
+    )
+    multitask.add_argument("--resume", action=argparse.BooleanOptionalAction, default=True)
+    optimize_b4h = subparsers.add_parser(
+        "run-rta-adalora-optimization",
+        help="run B4-H implementation-only optimization feasibility",
+    )
+    optimize_b4h.add_argument("--protocol", type=Path, help="override protocol config")
+    optimize_b4h.add_argument("--config", type=Path, help="override B4-H-O config")
+    optimize_b4h.add_argument("--stage", choices=("feasibility", "full"), default="feasibility")
+    optimize_b4h.add_argument(
+        "--development-dir", type=Path, default=Path("data/processed/protocol_v1/development")
+    )
+    optimize_b4h.add_argument(
+        "--manifest-dir", type=Path, default=Path("data/processed/protocol_v1/cv_manifests")
+    )
+    optimize_b4h.add_argument(
+        "--protocol-report-dir", type=Path, default=Path("reports/protocol_v1")
+    )
+    optimize_b4h.add_argument(
+        "--report-dir",
+        type=Path,
+        default=Path("reports/rta_adalora_multitask_optimization_v1"),
+    )
     transformer = subparsers.add_parser(
         "run-transformer-finetuning",
         help="run development-only Phase B2 controlled DeBERTa fine-tuning",
@@ -307,6 +354,40 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
         print(f"Engineering subset rows: {result['subset_rows']}")
+        return 0
+    if args.command == "run-rta-adalora-multitask":
+        try:
+            result = run_multitask_feasibility(
+                development_dir=args.development_dir.resolve(),
+                manifest_dir=args.manifest_dir.resolve(),
+                protocol_report_dir=args.protocol_report_dir.resolve(),
+                report_dir=args.report_dir.resolve(),
+                protocol=load_protocol(args.protocol),
+                config_path=args.config,
+                stage=args.stage,
+            )
+        except (ProtocolError, BenchmarkError, OSError, KeyError, RuntimeError) as exc:
+            mark_multitask_feasibility_failed(args.report_dir.resolve(), exc)
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(f"Engineering subset rows: {result['subset_rows']}")
+        return 0
+    if args.command == "run-rta-adalora-optimization":
+        try:
+            result = run_optimization_feasibility(
+                development_dir=args.development_dir.resolve(),
+                manifest_dir=args.manifest_dir.resolve(),
+                protocol_report_dir=args.protocol_report_dir.resolve(),
+                report_dir=args.report_dir.resolve(),
+                protocol=load_protocol(args.protocol),
+                config_path=args.config,
+                stage=args.stage,
+            )
+        except (ProtocolError, BenchmarkError, OSError, KeyError, RuntimeError) as exc:
+            mark_optimization_failed(args.report_dir.resolve(), exc)
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(f"Selected engineering candidate: {result['selected_candidate']}")
         return 0
     if args.command == "run-rta-fusion":
         try:

@@ -1,0 +1,45 @@
+experiment_id = "rta-adalora-multitask-optimization-v1"
+seed = 20260809
+model_id = "Colorful/RTA"
+resolved_revision = "56cc614ee7cf17b8c1875e6848037f9e5bafc41a"
+peft_method = "ADALORA"
+peft_version = "0.19.1"
+max_length = 512
+future_epochs = 3
+learning_rate = 0.0001
+weight_decay = 0.01
+warmup_fraction = 0.06
+max_grad_norm = 1.0
+focal_gamma = 2.0
+task_loss_weights = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+effective_batch_size = 32
+micro_batch = 8
+gradient_accumulation = 4
+dynamic_padding = true
+pad_to_multiple_of = 8
+deterministic_length_bucketing = true
+length_signal = "TRAIN_TOKEN_LENGTH_ONLY"
+init_r = 12
+target_r = 8
+lora_alpha = 16
+lora_dropout = 0.05
+target_modules = ["query", "value"]
+semantic_weight = 1.0
+benchmark_epochs_per_candidate = 1
+warmup_optimizer_steps = 101
+candidate_dtypes = ["float32", "bfloat16"]
+float16_allowed = false
+
+[subset]
+rows = 10000
+fingerprint = "d3b5a5f646e66d2c05fc26f4051b6abca6e15a0af80fce8baf604516f5aebad4"
+source = "DEVELOPMENT_TRAIN_ONLY"
+
+[baseline]
+training_runtime_seconds = 6733.709
+epoch_seconds = [4282.628, 1213.844, 1237.196]
+example_exposures_per_second = 4.4552
+tokens_per_second = 846.0815
+inference_documents_per_second = 22.5744
+central_projection_seconds = 232117.726
+conservative_projection_seconds = 313358.930

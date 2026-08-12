@@ -1,0 +1,93 @@
+{
+  "inference": {
+    "documents_per_second": 22.574447862278188,
+    "embedding_dimension": 768,
+    "inference_batch_size": 16,
+    "inference_rows": 1000,
+    "mps_fallback_events": 0,
+    "outputs_per_shared_forward": [
+      "embedding_768",
+      "S6_logits",
+      "S3_logits",
+      "S2_logits"
+    ],
+    "predictive_metrics_calculated": false,
+    "runtime_seconds": 44.297871916991426,
+    "tokens_per_second": 3838.8525823239925
+  },
+  "training": {
+    "adapter_and_three_head_checkpoint_size_bytes": 8324109,
+    "class_weights": {
+      "S2": {
+        "HIGH_IMPACT": 1.6516,
+        "LOWER_IMPACT": 0.3484
+      },
+      "S3": {
+        "HIGH": 0.6436880572320478,
+        "LOW": 2.211646145361395,
+        "MEDIUM": 0.1446657974065575
+      },
+      "S6": {
+        "blocker": 1.6706965162129266,
+        "critical": 0.5933974941305955,
+        "major": 0.2549291686864411,
+        "minor": 0.6930296659846215,
+        "normal": 0.03621171651706511,
+        "trivial": 2.7517354384683497
+      }
+    },
+    "effective_batch_size": 32,
+    "epoch_diagnostics": [
+      {
+        "epoch": 1,
+        "optimizer_steps_completed": 313,
+        "s2_training_loss": 0.0981002638399601,
+        "s3_training_loss": 0.16262120322883128,
+        "s6_training_loss": 0.2086114807754755,
+        "total_training_loss": 0.15644431589245797,
+        "training_seconds": 4282.628444000002
+      },
+      {
+        "epoch": 2,
+        "optimizer_steps_completed": 626,
+        "s2_training_loss": 0.09587799863517285,
+        "s3_training_loss": 0.15441053066253663,
+        "s6_training_loss": 0.20068110704123973,
+        "total_training_loss": 0.1503232121527195,
+        "training_seconds": 1213.8437035420066
+      },
+      {
+        "epoch": 3,
+        "optimizer_steps_completed": 939,
+        "s2_training_loss": 0.09326276706159115,
+        "s3_training_loss": 0.15070642624795436,
+        "s6_training_loss": 0.19629677774608134,
+        "total_training_loss": 0.14675532365739347,
+        "training_seconds": 1237.195735250003
+      }
+    ],
+    "example_exposures": 30000,
+    "example_exposures_per_second": 4.45519689133206,
+    "gradient_accumulation": 4,
+    "mps_current_allocated_bytes": 512254720,
+    "mps_driver_allocated_bytes": 18383683584,
+    "mps_fallback_events": 0,
+    "nan_inf_events": 0,
+    "oom_events": [],
+    "optimizer_steps": 939,
+    "optimizer_steps_per_second": 0.13944766269869346,
+    "peak_process_rss_bytes": 2393522176,
+    "process_rss_after_training_bytes": 307724288,
+    "process_rss_before_training_bytes": 1375715328,
+    "selected_micro_batch": 8,
+    "task_loss_weights": {
+      "S2": 0.3333333333333333,
+      "S3": 0.3333333333333333,
+      "S6": 0.3333333333333333
+    },
+    "tokenization_runtime_seconds": 2.2285398749954766,
+    "tokens_per_second": 846.0815409162909,
+    "training_runtime_seconds": 6733.70913379101,
+    "warmup_steps": 56
+  }
+}

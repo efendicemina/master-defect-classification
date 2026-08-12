@@ -1,0 +1,19 @@
+{
+  "candidate_artifacts_recovered": 0,
+  "failure_field": "bfloat16_preflight.checks.embedding_valid",
+  "failure_type": "torch.Tensor scalar boolean",
+  "launchd_last_exit_code": 1,
+  "missing_required_measurements": [
+    "O1 candidate result",
+    "O2 candidate result",
+    "bfloat16 preflight result",
+    "token and padding audit",
+    "optimized inference result",
+    "full runtime projection"
+  ],
+  "original_pid": 71920,
+  "original_process_alive": false,
+  "recovery_requires_expensive_candidate_repetition": true,
+  "status": "FAILED_REPORTING",
+  "temporary_atomic_json_recovered": false
+}

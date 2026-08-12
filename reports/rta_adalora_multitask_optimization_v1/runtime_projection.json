@@ -1,0 +1,50 @@
+{
+  "absolute_hours_saved": -188.05754698773836,
+  "baseline_central_hours": 64.47714611111111,
+  "baseline_central_seconds": 232117.726,
+  "engineering_category": "STILL VERY EXPENSIVE",
+  "folds": [
+    {
+      "central_fold_hours": 42.13042869298405,
+      "central_fold_seconds": 151669.54329474256,
+      "checkpoint_reporting_seconds": 100.0,
+      "fold": 1,
+      "lexical_fusion_seconds": 83.1461101660002,
+      "shared_embedding_and_validation_forward_seconds": 944.964867843352,
+      "startup_seconds": 150.0553111259942,
+      "steady_state_training_seconds": 150391.3770056072,
+      "training_rows": 51891,
+      "validation_rows": 50256
+    },
+    {
+      "central_fold_hours": 84.07221918858086,
+      "central_fold_seconds": 302659.9890788911,
+      "checkpoint_reporting_seconds": 100.0,
+      "fold": 2,
+      "lexical_fusion_seconds": 192.9887443329999,
+      "shared_embedding_and_validation_forward_seconds": 1419.699927346982,
+      "startup_seconds": 150.0553111259942,
+      "steady_state_training_seconds": 300797.2450960852,
+      "training_rows": 103787,
+      "validation_rows": 49677
+    },
+    {
+      "central_fold_hours": 126.33204521728456,
+      "central_fold_seconds": 454795.36278222443,
+      "checkpoint_reporting_seconds": 100.0,
+      "fold": 3,
+      "lexical_fusion_seconds": 1455.1548432480013,
+      "shared_embedding_and_validation_forward_seconds": 1901.53052615804,
+      "startup_seconds": 150.0553111259942,
+      "steady_state_training_seconds": 451188.62210169237,
+      "training_rows": 155678,
+      "validation_rows": 49870
+    }
+  ],
+  "optimized_central_hours": 252.5346930988495,
+  "optimized_central_seconds": 909124.8951558581,
+  "optimized_conservative_hours": 340.92183568344683,
+  "optimized_conservative_seconds": 1227318.6084604086,
+  "runtime_reduction_percent": -291.66543237454346,
+  "safety_margin": "35%"
+}
