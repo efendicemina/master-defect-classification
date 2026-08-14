@@ -17,6 +17,7 @@ from defect_classifier.classical_optimization import run_classical_optimization
 from defect_classifier.config import ConfigurationError, resolve_data_root
 from defect_classifier.cv_manifests import CvManifestError, materialize_frozen_cv_manifests
 from defect_classifier.dataset_audits import AuditError, run_audit
+from defect_classifier.final_training import mark_final_training_failed, run_final_training
 from defect_classifier.lexical_semantic_fusion import run_fusion_benchmark
 from defect_classifier.long_text_embeddings import (
     finalize_long_text_checkpoints,
@@ -260,6 +261,27 @@ def build_parser() -> argparse.ArgumentParser:
         default=Path("data/processed/rta_adalora_multitask_v1"),
     )
     multitask.add_argument("--resume", action=argparse.BooleanOptionalAction, default=True)
+    final_train = subparsers.add_parser(
+        "train-final-model",
+        help="fit the frozen selected B4-H pipeline once on full DEVELOPMENT only",
+    )
+    final_train.add_argument("--protocol", type=Path, help="override protocol config")
+    final_train.add_argument("--config", type=Path, help="override frozen B4-H config")
+    final_train.add_argument(
+        "--development-dir", type=Path, default=Path("data/processed/protocol_v1/development")
+    )
+    final_train.add_argument(
+        "--protocol-report-dir", type=Path, default=Path("reports/protocol_v1")
+    )
+    final_train.add_argument(
+        "--freeze-file",
+        type=Path,
+        default=Path("reports/model_selection_v1/model_selection_freeze.json"),
+    )
+    final_train.add_argument("--report-dir", type=Path, default=Path("reports/final_training_v1"))
+    final_train.add_argument(
+        "--artifact-root", type=Path, default=Path("data/processed/final_model_v1")
+    )
     optimize_b4h = subparsers.add_parser(
         "run-rta-adalora-optimization",
         help="run B4-H implementation-only optimization feasibility",
@@ -346,6 +368,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     print(f"Python: {platform.python_version()} ({sys.executable})")
     print(f"Platform: {platform.platform()}")
+    if args.command == "train-final-model":
+        try:
+            result = run_final_training(
+                development_dir=args.development_dir.resolve(),
+                protocol_report_dir=args.protocol_report_dir.resolve(),
+                report_dir=args.report_dir.resolve(),
+                artifact_root=args.artifact_root.resolve(),
+                freeze_file=args.freeze_file.resolve(),
+                protocol=load_protocol(args.protocol),
+                config_path=args.config,
+            )
+        except (ProtocolError, BenchmarkError, OSError, KeyError, RuntimeError) as exc:
+            mark_final_training_failed(args.report_dir.resolve(), exc)
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(f"Final DEVELOPMENT rows fitted: {result['development_rows']}")
+        print(f"Final pipeline artifacts: {result['artifact_root']}")
+        return 0
     if args.command == "run-rta-adalora-feasibility":
         try:
             result = run_adalora_feasibility(
