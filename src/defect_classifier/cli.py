@@ -29,7 +29,10 @@ from defect_classifier.rta_adalora import mark_feasibility_failed, run_adalora_f
 from defect_classifier.rta_adalora_multitask import (
     mark_feasibility_failed as mark_multitask_feasibility_failed,
 )
-from defect_classifier.rta_adalora_multitask import run_multitask_feasibility
+from defect_classifier.rta_adalora_multitask import (
+    run_multitask_competitive,
+    run_multitask_feasibility,
+)
 from defect_classifier.rta_adalora_optimization import (
     mark_optimization_failed,
     run_optimization_feasibility,
@@ -251,6 +254,11 @@ def build_parser() -> argparse.ArgumentParser:
     multitask.add_argument(
         "--report-dir", type=Path, default=Path("reports/rta_adalora_multitask_v1")
     )
+    multitask.add_argument(
+        "--checkpoint-root",
+        type=Path,
+        default=Path("data/processed/rta_adalora_multitask_v1"),
+    )
     multitask.add_argument("--resume", action=argparse.BooleanOptionalAction, default=True)
     optimize_b4h = subparsers.add_parser(
         "run-rta-adalora-optimization",
@@ -357,20 +365,35 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     if args.command == "run-rta-adalora-multitask":
         try:
-            result = run_multitask_feasibility(
-                development_dir=args.development_dir.resolve(),
-                manifest_dir=args.manifest_dir.resolve(),
-                protocol_report_dir=args.protocol_report_dir.resolve(),
-                report_dir=args.report_dir.resolve(),
-                protocol=load_protocol(args.protocol),
-                config_path=args.config,
-                stage=args.stage,
-            )
+            if args.stage == "full":
+                result = run_multitask_competitive(
+                    development_dir=args.development_dir.resolve(),
+                    manifest_dir=args.manifest_dir.resolve(),
+                    protocol_report_dir=args.protocol_report_dir.resolve(),
+                    report_dir=args.report_dir.resolve(),
+                    protocol=load_protocol(args.protocol),
+                    checkpoint_root=args.checkpoint_root.resolve(),
+                    config_path=args.config,
+                    stage=args.stage,
+                )
+            else:
+                result = run_multitask_feasibility(
+                    development_dir=args.development_dir.resolve(),
+                    manifest_dir=args.manifest_dir.resolve(),
+                    protocol_report_dir=args.protocol_report_dir.resolve(),
+                    report_dir=args.report_dir.resolve(),
+                    protocol=load_protocol(args.protocol),
+                    config_path=args.config,
+                    stage=args.stage,
+                )
         except (ProtocolError, BenchmarkError, OSError, KeyError, RuntimeError) as exc:
             mark_multitask_feasibility_failed(args.report_dir.resolve(), exc)
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
-        print(f"Engineering subset rows: {result['subset_rows']}")
+        if args.stage == "full":
+            print(f"Transformer folds successful: {result['transformer_runs_successful']}")
+        else:
+            print(f"Engineering subset rows: {result['subset_rows']}")
         return 0
     if args.command == "run-rta-adalora-optimization":
         try:

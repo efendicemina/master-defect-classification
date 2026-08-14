@@ -17,7 +17,13 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
-from defect_classifier.classical_benchmark import BenchmarkError
+import numpy as np
+
+from defect_classifier.classical_benchmark import BenchmarkError, _fit_one
+from defect_classifier.classical_features import build_sparse_features
+from defect_classifier.classical_metrics import classification_metrics
+from defect_classifier.classical_optimization import _feature_config, load_optimization_config
+from defect_classifier.lexical_semantic_fusion import fuse_sparse_features
 from defect_classifier.preparation import _membership_fingerprint
 from defect_classifier.protocol import FrozenProtocol
 from defect_classifier.rta_adalora import (
@@ -296,6 +302,17 @@ def _loader(
     )
 
 
+def _fixed_tokenize(tokenizer: Any, texts: list[str]) -> dict[str, Any]:
+    """Tokenize with the frozen B4-H full-run fixed-padding float32 protocol."""
+    return tokenizer(
+        texts,
+        max_length=MAX_LENGTH,
+        truncation=True,
+        padding="max_length",
+        return_attention_mask=True,
+    )
+
+
 def _move(batch: dict[str, Any], device: str) -> tuple[dict[str, Any], dict[str, Any]]:
     labels = {task: batch.pop(f"labels_{task.casefold()}").to(device) for task in TASKS}
     return {key: value.to(device) for key, value in batch.items()}, labels
@@ -481,6 +498,272 @@ def _inference(
         "predictive_metrics_calculated": False,
         "mps_fallback_events": 0,
     }
+
+
+def _predict_and_embed(
+    model: Any,
+    tokenizer: Any,
+    encoded: dict[str, Any],
+    label_ids: dict[str, list[int]],
+    batch_size: int,
+    seed: int,
+) -> tuple[dict[str, list[int]], np.ndarray, dict[str, Any]]:
+    import torch
+
+    loader = _loader(tokenizer, encoded, label_ids, batch_size, seed, False)
+    model.eval()
+    predictions: dict[str, list[int]] = {task: [] for task in TASKS}
+    embeddings = []
+    documents = token_count = 0
+    started = time.monotonic()
+    with torch.inference_mode():
+        for batch in loader:
+            inputs, _ = _move(batch, "mps")
+            output = model(**inputs, output_hidden_states=True)
+            for task in TASKS:
+                predictions[task].extend(output.logits[task].argmax(dim=1).cpu().tolist())
+            batch_embeddings = torch.nn.functional.normalize(
+                output.hidden_states[-1][:, 0, :].float(), p=2, dim=1
+            )
+            if batch_embeddings.shape[1] != DIMENSION or not torch.isfinite(batch_embeddings).all():
+                raise BenchmarkError("invalid B4-H adapted representation")
+            embeddings.append(batch_embeddings.cpu().numpy().astype(np.float32, copy=False))
+            documents += batch_embeddings.shape[0]
+            token_count += int(inputs["attention_mask"].sum().cpu())
+    torch.mps.synchronize()
+    elapsed = time.monotonic() - started
+    return (
+        predictions,
+        np.concatenate(embeddings, axis=0),
+        {
+            "rows": documents,
+            "runtime_seconds": elapsed,
+            "documents_per_second": documents / elapsed,
+            "tokens_per_second": token_count / elapsed,
+            "embedding_dimension": DIMENSION,
+        },
+    )
+
+
+def _embed_only(
+    model: Any,
+    tokenizer: Any,
+    encoded: dict[str, Any],
+    label_ids: dict[str, list[int]],
+    batch_size: int,
+    seed: int,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    _, embeddings, diagnostics = _predict_and_embed(
+        model, tokenizer, encoded, label_ids, batch_size, seed
+    )
+    return embeddings, diagnostics
+
+
+def _expected_fold_sizes() -> dict[int, tuple[int, int]]:
+    return {1: (51891, 50256), 2: (103787, 49677), 3: (155678, 49870)}
+
+
+def _fold_result_path(checkpoint_root: Path, fold: int) -> Path:
+    return checkpoint_root / f"fold_{fold}" / "result.json"
+
+
+def _valid_completed_fold(
+    path: Path,
+    *,
+    fold: int,
+    config_sha256: str,
+    protocol: FrozenProtocol,
+    development_sha256: str,
+) -> dict[str, Any] | None:
+    if not path.is_file():
+        return None
+    result = json.loads(path.read_text(encoding="utf-8"))
+    expected_train, expected_validation = _expected_fold_sizes()[fold]
+    if result.get("status") != "SUCCESS":
+        raise BenchmarkError(f"B4-H fold {fold} checkpoint is not SUCCESS")
+    expected = {
+        "fold": fold,
+        "config_sha256": config_sha256,
+        "protocol_sha256": protocol.fingerprint,
+        "development_membership_sha256": development_sha256,
+        "model_id": MODEL_ID,
+        "resolved_revision": MODEL_REVISION,
+        "engineering_configuration": "ORIGINAL_FIXED_PADDING_FLOAT32",
+        "o1_dynamic_padding_used": False,
+        "o2_bfloat16_used": False,
+        "locked_test_accessed": False,
+    }
+    if any(result.get(key) != value for key, value in expected.items()):
+        raise BenchmarkError(f"B4-H fold {fold} checkpoint provenance drift")
+    if (
+        result.get("training_rows") != expected_train
+        or result.get("validation_rows") != expected_validation
+    ):
+        raise BenchmarkError(f"B4-H fold {fold} checkpoint membership-size drift")
+    return result
+
+
+def _labels_for_ids(
+    rows: dict[str, Any], stable_ids: list[str], protocol: FrozenProtocol
+) -> tuple[dict[str, list[str]], dict[str, list[int]]]:
+    labels: dict[str, list[str]] = {task: [] for task in TASKS}
+    for stable_id in stable_ids:
+        expected = hierarchical_targets(rows[stable_id].targets["S6"], protocol)
+        actual = tuple(rows[stable_id].targets[task] for task in TASKS)
+        if actual != expected:
+            raise BenchmarkError("frozen hierarchical target mapping drift")
+        for task, value in zip(TASKS, actual, strict=True):
+            labels[task].append(value)
+    orders = {task: protocol.targets[task.casefold()].order for task in TASKS}
+    label_ids = {
+        task: [orders[task].index(value) for value in values] for task, values in labels.items()
+    }
+    return labels, label_ids
+
+
+def _task_metrics(
+    true_labels: dict[str, list[str]], predicted_ids: dict[str, list[int]], protocol: FrozenProtocol
+) -> dict[str, Any]:
+    metrics = {}
+    for task in TASKS:
+        order = protocol.targets[task.casefold()].order
+        predictions = [order[index] for index in predicted_ids[task]]
+        metrics[task] = classification_metrics(true_labels[task], predictions, order)
+    return metrics
+
+
+def _run_adapted_lexical_fusion(
+    *,
+    rows: dict[str, Any],
+    train_ids: list[str],
+    validation_ids: list[str],
+    train_embeddings: np.ndarray,
+    validation_embeddings: np.ndarray,
+    labels_train: dict[str, list[str]],
+    labels_validation: dict[str, list[str]],
+    protocol: FrozenProtocol,
+    config: dict[str, Any],
+    config_sha256: str,
+    fold: int,
+) -> dict[str, Any]:
+    a2_config, a2_sha = load_optimization_config()
+    results: dict[str, Any] = {}
+    for task in TASKS:
+        lexical = config["lexical"][task]
+        variant = next(
+            item
+            for item in a2_config["representations"][task]
+            if item["id"] == lexical["representation_id"]
+        )
+        feature_config = _feature_config(a2_config, variant)
+        lexical_features = build_sparse_features(
+            lexical["representation"],
+            [rows[stable_id].text for stable_id in train_ids],
+            [rows[stable_id].text for stable_id in validation_ids],
+            feature_config,
+        )
+        fused = fuse_sparse_features(
+            lexical_features, train_embeddings, validation_embeddings, config["semantic_weight"]
+        )
+        fit_config = {
+            "models": {
+                "c": lexical["c"],
+                "logreg_solver": a2_config["models"]["logreg_solver"],
+                "logreg_max_iter": a2_config["models"]["logreg_max_iter"],
+                "linearsvc_max_iter": a2_config["models"]["linearsvc_max_iter"],
+            }
+        }
+        result = _fit_one(
+            stage="B4H_ADAPTED_LEXICAL_FUSION",
+            task=task,
+            representation=f"B4H_{lexical['representation']}_ADAPTED_RTA",
+            classifier=lexical["classifier"],
+            class_weight=lexical["class_weight"],
+            fold=fold,
+            feature_count=fused.feature_count,
+            training_matrix=fused.training,
+            validation_matrix=fused.validation,
+            training_labels=labels_train[task],
+            validation_labels=labels_validation[task],
+            protocol=protocol,
+            config=fit_config,
+            benchmark_fingerprint=config_sha256,
+            provenance={
+                "b4h_config_sha256": config_sha256,
+                "a2_config_sha256": a2_sha,
+                "semantic_encoder": "B4H_ADAPTED_RTA_CLS",
+                "semantic_dimension": str(DIMENSION),
+                "semantic_weight": str(config["semantic_weight"]),
+                "locked_test_accessed": "False",
+            },
+        )
+        if result.get("status") != "SUCCESS":
+            raise BenchmarkError(f"B4-H adapted lexical fusion failed for fold {fold} {task}")
+        results[task] = result
+    return results
+
+
+def _aggregate_task_metrics(fold_results: list[dict[str, Any]], family_key: str) -> dict[str, Any]:
+    aggregate: dict[str, Any] = {}
+    for task in TASKS:
+        values = [item[family_key][task]["metrics"] for item in fold_results]
+        aggregate[task] = {
+            metric: {
+                "mean": statistics.fmean(row[metric] for row in values),
+                "folds": [row[metric] for row in values],
+            }
+            for metric in ("macro_f1", "balanced_accuracy", "accuracy", "weighted_f1")
+        }
+        aggregate[task]["per_class_by_fold"] = [row["per_class"] for row in values]
+        aggregate[task]["confusion_matrices"] = [row["confusion_matrix"] for row in values]
+    return aggregate
+
+
+def _write_full_reports(report_dir: Path, fold_results: list[dict[str, Any]]) -> dict[str, Any]:
+    direct = _aggregate_task_metrics(fold_results, "direct_heads")
+    fusion = _aggregate_task_metrics(fold_results, "adapted_lexical_fusion")
+    summary = {"direct_heads": direct, "adapted_lexical_fusion": fusion}
+    _atomic_json(report_dir / "full_metrics_summary.json", summary)
+    rows = ["family,task,macro_f1_mean,balanced_accuracy_mean,accuracy_mean,weighted_f1_mean"]
+    for family, family_metrics in summary.items():
+        for task, metrics in family_metrics.items():
+            rows.append(
+                ",".join(
+                    [
+                        family,
+                        task,
+                        f"{metrics['macro_f1']['mean']:.10f}",
+                        f"{metrics['balanced_accuracy']['mean']:.10f}",
+                        f"{metrics['accuracy']['mean']:.10f}",
+                        f"{metrics['weighted_f1']['mean']:.10f}",
+                    ]
+                )
+            )
+    (report_dir / "B4H_COMPETITIVE_SUMMARY.csv").write_text(
+        "\n".join(rows) + "\n", encoding="utf-8"
+    )
+    report_lines = [
+        "# Phase B4-H Competitive Development-Only Results",
+        "",
+        "Three fold-specific shared RTA + AdaLoRA adapters were trained with the frozen original "
+        "fixed-padding float32 configuration. Locked-test data was not accessed.",
+        "",
+    ]
+    for family, title in (
+        ("direct_heads", "Direct multi-task heads"),
+        ("adapted_lexical_fusion", "Adapted-RTA lexical fusion"),
+    ):
+        report_lines.extend([f"## {title}", ""])
+        for task in TASKS:
+            report_lines.append(
+                f"- {task}: macro-F1={summary[family][task]['macro_f1']['mean']:.4f}, "
+                f"balanced-accuracy={summary[family][task]['balanced_accuracy']['mean']:.4f}"
+            )
+        report_lines.append("")
+    (report_dir / "RTA_ADALORA_MULTITASK_COMPETITIVE.md").write_text(
+        "\n".join(report_lines), encoding="utf-8"
+    )
+    return summary
 
 
 def _projection(
@@ -832,4 +1115,292 @@ def run_multitask_feasibility(
         result_artifact_path=str(result_path.resolve()),
     )
     print(f"[B4-H] SUCCESS result={result_path.resolve()}", flush=True)
+    return result
+
+
+def run_multitask_competitive(
+    *,
+    development_dir: Path,
+    manifest_dir: Path,
+    protocol_report_dir: Path,
+    report_dir: Path,
+    protocol: FrozenProtocol,
+    checkpoint_root: Path = Path("data/processed/rta_adalora_multitask_v1"),
+    config_path: Path | None = None,
+    stage: str = "full",
+) -> dict[str, Any]:
+    """Run/resume the authorized B4-H competitive development-only matrix."""
+    if stage != "full":
+        raise BenchmarkError("Phase B4-H competitive runner only supports stage=full")
+    import psutil
+    import torch
+    from transformers import AutoTokenizer
+
+    from defect_classifier.classical_benchmark import _load_development_rows, _load_fold
+
+    if version("peft") != PEFT_VERSION:
+        raise BenchmarkError("installed PEFT version differs from frozen B4-H version")
+    if not torch.backends.mps.is_available():
+        raise BenchmarkError("Phase B4-H full competitive execution requires MPS")
+    config, fingerprint = load_multitask_config(config_path)
+    if config.get("dtype") != "float32":
+        raise BenchmarkError("B4-H competitive run must remain float32")
+    frozen = json.loads((protocol_report_dir / "fingerprints.json").read_text())
+    if frozen["protocol_sha256"] != protocol.fingerprint:
+        raise BenchmarkError("protocol fingerprint drift")
+    development_sha256 = frozen["development_membership_sha256"]
+    report_dir.mkdir(parents=True, exist_ok=True)
+    checkpoint_root.mkdir(parents=True, exist_ok=True)
+    work = report_dir / ".work" / "full"
+    work.mkdir(parents=True, exist_ok=True)
+    status_path = work / "full.status"
+    (work / "full.pid").write_text(f"{os.getpid()}\n", encoding="utf-8")
+    _status(
+        status_path,
+        state="RUNNING",
+        current_phase="loading_development_membership",
+        stage="COMPETITIVE_DEVELOPMENT_ONLY",
+        engineering_configuration="ORIGINAL_FIXED_PADDING_FLOAT32",
+        o1_dynamic_padding_used=False,
+        o2_bfloat16_used=False,
+        model_id=MODEL_ID,
+        resolved_revision=MODEL_REVISION,
+        max_length=MAX_LENGTH,
+        dtype="float32",
+        train_micro_batch=8,
+        gradient_accumulation=4,
+        effective_batch_size=EFFECTIVE_BATCH_SIZE,
+        epochs=EPOCHS,
+        planned_transformer_runs=3,
+        competitive_fits_completed=0,
+        locked_test_accessed=False,
+    )
+    print(
+        "[B4-H-FULL] starting DEVELOPMENT_ONLY competitive run "
+        f"model={MODEL_ID} revision={MODEL_REVISION} config_sha256={fingerprint} "
+        "configuration=ORIGINAL_FIXED_PADDING_FLOAT32 max_length=512 dtype=float32 "
+        "micro_batch=8 accumulation=4 effective_batch=32 epochs=3 "
+        "O1_DYNAMIC_PADDING_USED=NO O2_BFLOAT16_USED=NO locked_test=NOT_ACCESSED",
+        flush=True,
+    )
+    rows = _load_development_rows(development_dir)
+    if _membership_fingerprint(rows) != development_sha256:
+        raise BenchmarkError("development membership fingerprint drift")
+    folds = {
+        fold: _load_fold(
+            rows, manifest_dir, protocol_report_dir / "fingerprints.json", protocol, fold
+        )
+        for fold in future_shared_adapter_folds()
+    }
+    for fold, (train_ids, validation_ids) in folds.items():
+        if (len(train_ids), len(validation_ids)) != _expected_fold_sizes()[fold]:
+            raise BenchmarkError(f"B4-H fold {fold} membership-size drift")
+    _seed_everything(config["seed"])
+    tokenizer = AutoTokenizer.from_pretrained(
+        MODEL_ID, revision=MODEL_REVISION, trust_remote_code=False, local_files_only=True
+    )
+    completed = []
+    for fold in future_shared_adapter_folds():
+        existing = _valid_completed_fold(
+            _fold_result_path(checkpoint_root, fold),
+            fold=fold,
+            config_sha256=fingerprint,
+            protocol=protocol,
+            development_sha256=development_sha256,
+        )
+        if existing is not None:
+            completed.append(existing)
+            print(
+                f"[B4-H-FULL] resume checkpoint fold={fold} status=SUCCESS action=SKIP", flush=True
+            )
+    for fold in future_shared_adapter_folds():
+        if any(item["fold"] == fold for item in completed):
+            continue
+        train_ids, validation_ids = folds[fold]
+        _status(
+            status_path,
+            state="RUNNING",
+            current_phase="training",
+            current_fold=fold,
+            completed_folds=[item["fold"] for item in completed],
+            competitive_fits_completed=len(completed),
+        )
+        print(
+            f"[B4-H-FULL] current_fold={fold} phase=training "
+            f"training_rows={len(train_ids)} validation_rows={len(validation_ids)} "
+            f"train_membership={_membership_fingerprint(train_ids)} "
+            f"validation_membership={_membership_fingerprint(validation_ids)}",
+            flush=True,
+        )
+        train_labels, train_label_ids = _labels_for_ids(rows, train_ids, protocol)
+        validation_labels, validation_label_ids = _labels_for_ids(rows, validation_ids, protocol)
+        orders = {task: protocol.targets[task.casefold()].order for task in TASKS}
+        class_weight_values = {
+            task: balanced_mean_one_weights(train_labels[task], orders[task]) for task in TASKS
+        }
+        token_started = time.monotonic()
+        train_encoded = _fixed_tokenize(
+            tokenizer, [rows[stable_id].text for stable_id in train_ids]
+        )
+        validation_encoded = _fixed_tokenize(
+            tokenizer, [rows[stable_id].text for stable_id in validation_ids]
+        )
+        tokenization_seconds = time.monotonic() - token_started
+        micro_batch = 8
+        accumulation = EFFECTIVE_BATCH_SIZE // micro_batch
+        steps_per_epoch = math.ceil(math.ceil(len(train_ids) / micro_batch) / accumulation)
+        schedule = adalora_schedule(steps_per_epoch * EPOCHS)
+        resolved = {
+            **config,
+            "resolved_train_micro_batch": micro_batch,
+            "resolved_gradient_accumulation": accumulation,
+            "resolved_effective_batch_size": EFFECTIVE_BATCH_SIZE,
+            "steps_per_epoch": steps_per_epoch,
+            "adalora_schedule": schedule,
+        }
+        model, model_details = _build_multitask_model(schedule, "mps")
+        weight_tensors = {
+            task: torch.tensor(values, device="mps") for task, values in class_weight_values.items()
+        }
+        loader = _loader(
+            tokenizer, train_encoded, train_label_ids, micro_batch, config["seed"], True
+        )
+        rss_before = psutil.Process().memory_info().rss
+        diagnostics, training = _train(
+            model, loader, weight_tensors, resolved, schedule, status_path
+        )
+        training.update(
+            {
+                "epoch_diagnostics": diagnostics,
+                "tokenization_runtime_seconds": tokenization_seconds,
+                "class_weights": {
+                    task: dict(zip(orders[task], values, strict=True))
+                    for task, values in class_weight_values.items()
+                },
+                "selected_micro_batch": micro_batch,
+                "gradient_accumulation": accumulation,
+                "effective_batch_size": EFFECTIVE_BATCH_SIZE,
+                "process_rss_before_training_bytes": rss_before,
+                "process_rss_after_training_bytes": psutil.Process().memory_info().rss,
+                "mps_current_allocated_bytes": torch.mps.current_allocated_memory(),
+                "mps_driver_allocated_bytes": torch.mps.driver_allocated_memory(),
+            }
+        )
+        _status(status_path, current_phase="direct_validation_and_embedding_extraction")
+        val_pred_ids, validation_embeddings, validation_inference = _predict_and_embed(
+            model,
+            tokenizer,
+            validation_encoded,
+            validation_label_ids,
+            config["inference_batch_size"],
+            config["seed"],
+        )
+        train_embeddings, train_inference = _embed_only(
+            model,
+            tokenizer,
+            train_encoded,
+            train_label_ids,
+            config["inference_batch_size"],
+            config["seed"],
+        )
+        direct_metrics = {
+            task: {"metrics": value}
+            for task, value in _task_metrics(validation_labels, val_pred_ids, protocol).items()
+        }
+        _status(status_path, current_phase="adapted_lexical_fusion")
+        fusion = _run_adapted_lexical_fusion(
+            rows=rows,
+            train_ids=train_ids,
+            validation_ids=validation_ids,
+            train_embeddings=train_embeddings,
+            validation_embeddings=validation_embeddings,
+            labels_train=train_labels,
+            labels_validation=validation_labels,
+            protocol=protocol,
+            config=config,
+            config_sha256=fingerprint,
+            fold=fold,
+        )
+        fold_dir = checkpoint_root / f"fold_{fold}"
+        adapter_dir = fold_dir / "adapter"
+        model.save_pretrained(adapter_dir)
+        checkpoint_size = sum(
+            path.stat().st_size for path in adapter_dir.rglob("*") if path.is_file()
+        )
+        result = {
+            "status": "SUCCESS",
+            "stage": "COMPETITIVE_DEVELOPMENT_ONLY",
+            "fold": fold,
+            "training_rows": len(train_ids),
+            "validation_rows": len(validation_ids),
+            "train_membership_sha256": _membership_fingerprint(train_ids),
+            "validation_membership_sha256": _membership_fingerprint(validation_ids),
+            "development_membership_sha256": development_sha256,
+            "protocol_sha256": protocol.fingerprint,
+            "config_sha256": fingerprint,
+            "model_id": MODEL_ID,
+            "resolved_revision": MODEL_REVISION,
+            "engineering_configuration": "ORIGINAL_FIXED_PADDING_FLOAT32",
+            "max_length": MAX_LENGTH,
+            "dtype": "float32",
+            "o1_dynamic_padding_used": False,
+            "o2_bfloat16_used": False,
+            "locked_test_accessed": False,
+            "locked_test_tokenized": False,
+            "locked_test_embedded": False,
+            "locked_test_model_performance_accessed": False,
+            "locked_test_used_for_tuning": False,
+            "training": training,
+            "model_details": model_details,
+            "adapter_and_three_head_checkpoint_size_bytes": checkpoint_size,
+            "optimizer_scheduler": {"adamw_lr": LEARNING_RATE, "warmup_fraction": 0.06, **schedule},
+            "validation_inference": validation_inference,
+            "train_embedding_extraction": train_inference,
+            "direct_heads": direct_metrics,
+            "adapted_lexical_fusion": fusion,
+        }
+        _atomic_json(_fold_result_path(checkpoint_root, fold), result)
+        completed.append(result)
+        _status(
+            status_path,
+            state="RUNNING",
+            current_phase="fold_checkpoint_persisted",
+            current_fold=fold,
+            latest_checkpoint=str(_fold_result_path(checkpoint_root, fold).resolve()),
+            completed_folds=[item["fold"] for item in completed],
+            competitive_fits_completed=len(completed),
+        )
+        print(
+            f"[B4-H-FULL] checkpoint persisted fold={fold} "
+            f"path={_fold_result_path(checkpoint_root, fold).resolve()}",
+            flush=True,
+        )
+        del model, train_encoded, validation_encoded, train_embeddings, validation_embeddings
+        _clear_mps()
+    summary = _write_full_reports(report_dir, completed)
+    result = {
+        "status": "SUCCESS",
+        "stage": "COMPETITIVE_DEVELOPMENT_ONLY",
+        "folds_completed": [item["fold"] for item in completed],
+        "transformer_runs_planned": 3,
+        "transformer_runs_successful": len(completed),
+        "direct_heads_enabled": True,
+        "adapted_lexical_fusion_enabled": True,
+        "metrics_summary": summary,
+        "locked_test_tokenized": False,
+        "locked_test_embedded": False,
+        "locked_test_model_performance_accessed": False,
+        "locked_test_used_for_tuning": False,
+    }
+    _atomic_json(work / "full_result.json", result)
+    _status(
+        status_path,
+        state="SUCCESS",
+        current_phase="complete",
+        completed_folds=[item["fold"] for item in completed],
+        competitive_fits_completed=len(completed),
+        result_artifact_path=str((work / "full_result.json").resolve()),
+        locked_test_accessed=False,
+    )
+    print(f"[B4-H-FULL] SUCCESS result={(work / 'full_result.json').resolve()}", flush=True)
     return result

@@ -26,6 +26,7 @@ from defect_classifier.rta_adalora_multitask import (
     future_shared_adapter_folds,
     hierarchical_targets,
     load_multitask_config,
+    run_multitask_competitive,
     run_multitask_feasibility,
     validate_multitask_config,
 )
@@ -152,3 +153,29 @@ def test_engineering_run_has_no_competitive_or_locked_test_path():
     inference = inspect.getsource(module._inference)
     assert "output.hidden_states[-1][:, 0, :]" in inference
     assert "output.logits" in inference
+
+
+def test_competitive_run_is_frozen_fixed_padding_and_development_only():
+    from defect_classifier import rta_adalora_multitask as module
+
+    tokenization = inspect.getsource(module._fixed_tokenize)
+    assert 'padding="max_length"' in tokenization
+    assert "max_length=MAX_LENGTH" in tokenization
+    source = inspect.getsource(run_multitask_competitive)
+    assert "ORIGINAL_FIXED_PADDING_FLOAT32" in source
+    assert '"o1_dynamic_padding_used": False' in source
+    assert '"o2_bfloat16_used": False' in source
+    assert '"locked_test_tokenized": False' in source
+    assert '"locked_test_model_performance_accessed": False' in source
+    assert "future_shared_adapter_folds()" in source
+    assert "_valid_completed_fold" in source
+
+
+def test_competitive_expected_fold_sizes_are_frozen():
+    from defect_classifier import rta_adalora_multitask as module
+
+    assert module._expected_fold_sizes() == {
+        1: (51891, 50256),
+        2: (103787, 49677),
+        3: (155678, 49870),
+    }
