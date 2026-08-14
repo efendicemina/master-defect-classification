@@ -60,6 +60,7 @@ SELECTED_FAMILY = "B4H_ADAPTED_RTA_LEXICAL_FUSION"
 EXPECTED_DEVELOPMENT_ROWS = 207575
 EXPECTED_DEVELOPMENT_SHA256 = "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f"
 EXPECTED_PROTOCOL_SHA256 = "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda"
+EXPECTED_SEED = 20260809
 TRAIN_MICRO_BATCH = 8
 
 
@@ -122,6 +123,8 @@ def _load_and_validate_freeze(path: Path, protocol: FrozenProtocol) -> tuple[dic
         "use_cv_checkpoint_as_final_model": False,
     }:
         raise BenchmarkError("frozen final-training rule drift")
+    if document.get("transformer", {}).get("seed") != EXPECTED_SEED:
+        raise BenchmarkError("model-selection freeze seed drift")
     if protocol.fingerprint != EXPECTED_PROTOCOL_SHA256:
         raise BenchmarkError("protocol fingerprint differs from the frozen final-training protocol")
     return document, _sha256_file(path)
@@ -191,6 +194,8 @@ def run_final_training(
         raise BenchmarkError("frozen protocol/development fingerprints drift")
 
     config, config_sha256 = load_multitask_config(config_path)
+    if config.get("seed") != EXPECTED_SEED:
+        raise BenchmarkError("frozen B4-H training seed drift")
     a2_config, a2_config_sha256 = load_optimization_config()
 
     report_dir.mkdir(parents=True, exist_ok=True)
@@ -468,17 +473,17 @@ def run_final_training(
     }
     _atomic_json(manifest_path, result)
     report = (
-        "# Final B4-H Model Training V1\\n\\n"
+        "# Final B4-H Model Training V1\n\n"
         "One frozen B4-H adapted-RTA + lexical-fusion pipeline was fitted on the complete "
-        "DEVELOPMENT membership only.\\n\\n"
-        f"- DEVELOPMENT rows: `{len(train_ids)}`\\n"
-        f"- DEVELOPMENT membership SHA-256: `{EXPECTED_DEVELOPMENT_SHA256}`\\n"
-        f"- RTA revision: `{MODEL_REVISION}`\\n"
-        f"- Git HEAD: `{git_provenance['git_head']}`\\n"
-        f"- Runner tag: `{FINAL_TRAINING_TAG}`\\n"
-        f"- Runtime: `{result['runtime_seconds'] / 3600:.3f}` hours\\n"
-        "- Locked test accessed: **no**\\n"
-        "- Predictive metrics calculated: **no**\\n"
+        "DEVELOPMENT membership only.\n\n"
+        f"- DEVELOPMENT rows: `{len(train_ids)}`\n"
+        f"- DEVELOPMENT membership SHA-256: `{EXPECTED_DEVELOPMENT_SHA256}`\n"
+        f"- RTA revision: `{MODEL_REVISION}`\n"
+        f"- Git HEAD: `{git_provenance['git_head']}`\n"
+        f"- Runner tag: `{FINAL_TRAINING_TAG}`\n"
+        f"- Runtime: `{result['runtime_seconds'] / 3600:.3f}` hours\n"
+        "- Locked test accessed: **no**\n"
+        "- Predictive metrics calculated: **no**\n"
     )
     (report_dir / "FINAL_TRAINING_REPORT.md").write_text(report, encoding="utf-8")
     _status(

@@ -7,8 +7,10 @@ from defect_classifier.cli import build_parser
 from defect_classifier.final_training import (
     EXPECTED_DEVELOPMENT_ROWS,
     EXPECTED_DEVELOPMENT_SHA256,
+    EXPECTED_SEED,
     FINAL_TRAINING_TAG,
     SELECTED_FAMILY,
+    _load_and_validate_freeze,
     run_final_training,
 )
 
@@ -20,17 +22,21 @@ def test_final_training_is_full_development_and_single_selected_family():
         == "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f"
     )
     assert SELECTED_FAMILY == "B4H_ADAPTED_RTA_LEXICAL_FUSION"
+    assert EXPECTED_SEED == 20260809
     assert FINAL_TRAINING_TAG == "final-training-runner-v1"
 
 
 def test_final_training_source_has_no_locked_partition_read_or_unlock():
     source = inspect.getsource(run_final_training)
+    freeze_source = inspect.getsource(_load_and_validate_freeze)
     signature = inspect.signature(run_final_training)
     assert "locked_dir" not in signature.parameters
     assert "require_locked_test_unlock" not in source
     assert "data/locked" not in source
     assert "FINAL_EVALUATION_ONLY" not in source
     assert "locked_test_model_performance_accessed" in source
+    assert 'config.get("seed") != EXPECTED_SEED' in source
+    assert 'document.get("transformer", {}).get("seed") != EXPECTED_SEED' in freeze_source
 
 
 def test_final_training_cli_has_no_locked_path_argument():
