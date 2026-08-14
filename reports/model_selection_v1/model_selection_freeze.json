@@ -1,0 +1,130 @@
+{
+  "freeze_id": "model-selection-v1",
+  "freeze_date": "2026-08-14",
+  "source_commit_sha": "c6a68cf5ab14335e5d7fd55fa04a2d9c6c5cd503",
+  "protocol_id": "eclipse-severity-v1",
+  "protocol_sha256": "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda",
+  "selection_metric": "macro_f1",
+  "selection_scope": "DEVELOPMENT_ONLY",
+  "development_model_selection_closed": true,
+  "additional_model_selection_experiments_allowed": false,
+  "selected_family": "B4H_ADAPTED_RTA_LEXICAL_FUSION",
+  "direct_heads_selected": false,
+  "development_rows": 207575,
+  "development_membership_sha256": "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f",
+  "locked_test_rows": 50675,
+  "locked_test_membership_sha256": "c18f2320c896bf2bdcb94d2447ce9a04d17e6923f03b169f29b8174b8a5cf681",
+  "locked_test_accessed_for_model_selection": false,
+  "development_results": {
+    "S6": {
+      "b1_5_macro_f1": 0.27762300200842377,
+      "b4h_macro_f1": 0.29571163694298847,
+      "b4h_accuracy": 0.678659735903468,
+      "b4h_balanced_accuracy": 0.319558801216455,
+      "b4h_weighted_f1": 0.6820881450568552,
+      "paired_fold_wins_vs_b1_5": 3
+    },
+    "S3": {
+      "b1_5_macro_f1": 0.48010936138650373,
+      "b4h_macro_f1": 0.49673059524477176,
+      "b4h_accuracy": 0.6576278107060726,
+      "b4h_balanced_accuracy": 0.5454309939261774,
+      "b4h_weighted_f1": 0.6813260175048276,
+      "paired_fold_wins_vs_b1_5": 3
+    },
+    "S2": {
+      "b1_5_macro_f1": 0.642161874868565,
+      "b4h_macro_f1": 0.6540443359219981,
+      "b4h_accuracy": 0.7874565434941015,
+      "b4h_balanced_accuracy": 0.6888012544237295,
+      "b4h_weighted_f1": 0.8034381130146985,
+      "paired_fold_wins_vs_b1_5": 3
+    }
+  },
+  "transformer": {
+    "seed": 20260809,
+    "model_id": "Colorful/RTA",
+    "resolved_revision": "56cc614ee7cf17b8c1875e6848037f9e5bafc41a",
+    "peft_method": "ADALORA",
+    "peft_version": "0.19.1",
+    "dtype": "float32",
+    "max_length": 512,
+    "padding": "ORIGINAL_FIXED_PADDING",
+    "epochs": 3,
+    "optimizer": "AdamW",
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "warmup_fraction": 0.06,
+    "lr_schedule": "linear",
+    "max_grad_norm": 1.0,
+    "early_stopping": false,
+    "micro_batch": 8,
+    "gradient_accumulation": 4,
+    "effective_batch_size": 32,
+    "focal_gamma": 2.0,
+    "task_loss_weights": [0.3333333333333333, 0.3333333333333333, 0.3333333333333333],
+    "init_r": 12,
+    "target_r": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "target_modules": ["query", "value"],
+    "tinit_fraction": 0.1,
+    "tfinal_fraction": 0.2,
+    "allocation_target_updates": 100
+  },
+  "fusion": {
+    "semantic_dimension": 768,
+    "semantic_l2_normalized": true,
+    "semantic_weight": 1.0,
+    "S6": {
+      "representation": "CHAR",
+      "analyzer": "char_wb",
+      "ngram_range": [2, 5],
+      "min_df": 2,
+      "max_features": 150000,
+      "classifier": "LinearSVC",
+      "c": 0.25,
+      "class_weight": "balanced"
+    },
+    "S3": {
+      "representation": "WORD",
+      "ngram_range": [1, 2],
+      "min_df": 2,
+      "max_features": 250000,
+      "classifier": "LogisticRegression",
+      "solver": "lbfgs",
+      "c": 2.0,
+      "class_weight": "balanced"
+    },
+    "S2": {
+      "representation": "WORD_CHAR",
+      "word_ngram_range": [1, 2],
+      "char_analyzer": "char_wb",
+      "char_ngram_range": [3, 5],
+      "min_df": 2,
+      "word_max_features": 250000,
+      "char_max_features": 250000,
+      "classifier": "LogisticRegression",
+      "solver": "liblinear",
+      "c": 2.0,
+      "class_weight": "balanced"
+    }
+  },
+  "final_training": {
+    "training_partition": "FULL_DEVELOPMENT",
+    "training_rows": 207575,
+    "shared_transformer_training_runs": 1,
+    "epochs": 3,
+    "use_locked_test_during_training": false,
+    "use_cv_checkpoint_as_final_model": false
+  },
+  "final_evaluation": {
+    "evaluate_selected_family_only": true,
+    "evaluate_direct_heads_on_locked_test": false,
+    "tasks": ["S6", "S3", "S2"],
+    "primary_metric": "macro_f1",
+    "unlock_environment_variable": "DEFECT_CLASSIFIER_UNLOCK_LOCKED_TEST",
+    "unlock_value": "FINAL_EVALUATION_ONLY",
+    "post_test_tuning_allowed": false
+  }
+}
