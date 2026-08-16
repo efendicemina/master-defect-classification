@@ -1,0 +1,336 @@
+{
+  "a2_config_sha256": "089f7e6446648fbb67d77408f128ea69cee0928cd2d4b60a791b1eefcc5a40fd",
+  "artifact_hashes": {
+    "adapter/README.md": {
+      "sha256": "386fc3dc6c744dc32595b68d41c6f3e01f7d64f06e7b95d6da5dc2c4903e9471",
+      "size_bytes": 5141
+    },
+    "adapter/adapter_config.json": {
+      "sha256": "feb87fa571cc92f17a73e6890a6d0b30a857bb929a8e82525be8b5e988e86276",
+      "size_bytes": 6395
+    },
+    "adapter/adapter_model.safetensors": {
+      "sha256": "ffe9fd763ad2660469c3bdb887a8a5685ca72e81eb30b80793fd14a7872590ad",
+      "size_bytes": 8312580
+    },
+    "s2_classifier.pkl": {
+      "sha256": "fda2c50aaee606f05c8d3b5b6131064408b64eacca642db925105e458f25f0cf",
+      "size_bytes": 4006919
+    },
+    "s2_vectorizer.pkl": {
+      "sha256": "a9d3a57524447370096c35be6c93d1bc9f7212ced6f700bec3386bc5302c01b5",
+      "size_bytes": 17275973
+    },
+    "s3_classifier.pkl": {
+      "sha256": "422317a6eb86f6c3404537d12c3b5410e3e1ca7b2d67301037633d00da223728",
+      "size_bytes": 6019261
+    },
+    "s3_vectorizer.pkl": {
+      "sha256": "ff2e9dda6e3db5d2d88c5a20034b6e207add76e1458d7e06d18be060c22a99ac",
+      "size_bytes": 9677834
+    },
+    "s6_classifier.pkl": {
+      "sha256": "b8ccd7015eb891583a67bf3c38f97f2da1d4b31ba2335caae7514242360c5a21",
+      "size_bytes": 7237672
+    },
+    "s6_vectorizer.pkl": {
+      "sha256": "8a7f5ceebdffbd55838600f6f256be05cff9080bc4d52dee4ac4e09833428a00",
+      "size_bytes": 4543064
+    },
+    "tokenizer/tokenizer.json": {
+      "sha256": "624e3921f48a3e8a726d8d72cf01ce938cc993df31d87d87270abe0065456e38",
+      "size_bytes": 3558912
+    },
+    "tokenizer/tokenizer_config.json": {
+      "sha256": "a473eeb9224684f4bfd9b1d52efc97ae98ead2cba2e7620404c49c733647366a",
+      "size_bytes": 578
+    }
+  },
+  "artifact_root": "/Users/eminaefendictrapo/Projects/master-defect-classification/data/processed/final_model_v1",
+  "b4h_config_sha256": "76e17f754ad74fa5a938bb7ce180a6ed5f21cffcf7072ba1bca23111708b34fa",
+  "development_embedding_sha256": "ebbdedc9f2332395d77e20882402cc3445b86030fbec49450115bbe2fddd9656",
+  "development_membership_sha256": "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f",
+  "development_rows": 207575,
+  "embedding_extraction": {
+    "documents_per_second": 19.13210150723229,
+    "embedding_dimension": 768,
+    "rows": 207575,
+    "runtime_seconds": 10849.56610341696,
+    "tokens_per_second": 3952.882132907892
+  },
+  "environment": {
+    "device": "mps",
+    "dtype": "float32",
+    "packages": {
+      "accelerate": "1.14.0",
+      "numpy": "2.5.2",
+      "peft": "0.19.1",
+      "scikit-learn": "1.8.0",
+      "torch": "2.13.0",
+      "transformers": "5.14.1"
+    },
+    "platform": "macOS-26.6.1-arm64-arm-64bit",
+    "python": "3.12.13"
+  },
+  "git_head": "ed2f1fc0534c29b3dc9654a14789339c87584506",
+  "git_tags_at_head": [
+    "final-training-runner-v1"
+  ],
+  "git_worktree_clean": true,
+  "locked_test_accessed": false,
+  "locked_test_embedded": false,
+  "locked_test_model_performance_accessed": false,
+  "locked_test_tokenized": false,
+  "locked_test_used_for_tuning": false,
+  "model_details": {
+    "adalora_parameter_count": 442656,
+    "classification_head_architecture": "first_token->dropout->dense(768,768)->tanh->dropout->output",
+    "classification_head_dropout": 0.1,
+    "target_module_names": [
+      "roberta.encoder.layer.0.attention.self.query",
+      "roberta.encoder.layer.0.attention.self.value",
+      "roberta.encoder.layer.1.attention.self.query",
+      "roberta.encoder.layer.1.attention.self.value",
+      "roberta.encoder.layer.2.attention.self.query",
+      "roberta.encoder.layer.2.attention.self.value",
+      "roberta.encoder.layer.3.attention.self.query",
+      "roberta.encoder.layer.3.attention.self.value",
+      "roberta.encoder.layer.4.attention.self.query",
+      "roberta.encoder.layer.4.attention.self.value",
+      "roberta.encoder.layer.5.attention.self.query",
+      "roberta.encoder.layer.5.attention.self.value",
+      "roberta.encoder.layer.6.attention.self.query",
+      "roberta.encoder.layer.6.attention.self.value",
+      "roberta.encoder.layer.7.attention.self.query",
+      "roberta.encoder.layer.7.attention.self.value",
+      "roberta.encoder.layer.8.attention.self.query",
+      "roberta.encoder.layer.8.attention.self.value",
+      "roberta.encoder.layer.9.attention.self.query",
+      "roberta.encoder.layer.9.attention.self.value",
+      "roberta.encoder.layer.10.attention.self.query",
+      "roberta.encoder.layer.10.attention.self.value",
+      "roberta.encoder.layer.11.attention.self.query",
+      "roberta.encoder.layer.11.attention.self.value"
+    ],
+    "task_head_output_dimensions": {
+      "S2": 2,
+      "S3": 3,
+      "S6": 6
+    },
+    "three_head_parameter_count": 1780235,
+    "total_parameter_count": 128058190,
+    "trainable_parameter_count": 2222891,
+    "trainable_parameter_names": [
+      "base_model.model.roberta.encoder.layer.0.attention.self.query.lora_A.default",
+      "base_model.model.roberta.encoder.layer.0.attention.self.query.lora_B.default",
+      "base_model.model.roberta.encoder.layer.0.attention.self.query.lora_E.default",
+      "base_model.model.roberta.encoder.layer.0.attention.self.value.lora_A.default",
+      "base_model.model.roberta.encoder.layer.0.attention.self.value.lora_B.default",
+      "base_model.model.roberta.encoder.layer.0.attention.self.value.lora_E.default",
+      "base_model.model.roberta.encoder.layer.1.attention.self.query.lora_A.default",
+      "base_model.model.roberta.encoder.layer.1.attention.self.query.lora_B.default",
+      "base_model.model.roberta.encoder.layer.1.attention.self.query.lora_E.default",
+      "base_model.model.roberta.encoder.layer.1.attention.self.value.lora_A.default",
+      "base_model.model.roberta.encoder.layer.1.attention.self.value.lora_B.default",
+      "base_model.model.roberta.encoder.layer.1.attention.self.value.lora_E.default",
+      "base_model.model.roberta.encoder.layer.2.attention.self.query.lora_A.default",
+      "base_model.model.roberta.encoder.layer.2.attention.self.query.lora_B.default",
+      "base_model.model.roberta.encoder.layer.2.attention.self.query.lora_E.default",
+      "base_model.model.roberta.encoder.layer.2.attention.self.value.lora_A.default",
+      "base_model.model.roberta.encoder.layer.2.attention.self.value.lora_B.default",
+      "base_model.model.roberta.encoder.layer.2.attention.self.value.lora_E.default",
+      "base_model.model.roberta.encoder.layer.3.attention.self.query.lora_A.default",
+      "base_model.model.roberta.encoder.layer.3.attention.self.query.lora_B.default",
+      "base_model.model.roberta.encoder.layer.3.attention.self.query.lora_E.default",
+      "base_model.model.roberta.encoder.layer.3.attention.self.value.lora_A.default",
+      "base_model.model.roberta.encoder.layer.3.attention.self.value.lora_B.default",
+      "base_model.model.roberta.encoder.layer.3.attention.self.value.lora_E.default",
+      "base_model.model.roberta.encoder.layer.4.attention.self.query.lora_A.default",
+      "base_model.model.roberta.encoder.layer.4.attention.self.query.lora_B.default",
+      "base_model.model.roberta.encoder.layer.4.attention.self.query.lora_E.default",
+      "base_model.model.roberta.encoder.layer.4.attention.self.value.lora_A.default",
+      "base_model.model.roberta.encoder.layer.4.attention.self.value.lora_B.default",
+      "base_model.model.roberta.encoder.layer.4.attention.self.value.lora_E.default",
+      "base_model.model.roberta.encoder.layer.5.attention.self.query.lora_A.default",
+      "base_model.model.roberta.encoder.layer.5.attention.self.query.lora_B.default",
+      "base_model.model.roberta.encoder.layer.5.attention.self.query.lora_E.default",
+      "base_model.model.roberta.encoder.layer.5.attention.self.value.lora_A.default",
+      "base_model.model.roberta.encoder.layer.5.attention.self.value.lora_B.default",
+      "base_model.model.roberta.encoder.layer.5.attention.self.value.lora_E.default",
+      "base_model.model.roberta.encoder.layer.6.attention.self.query.lora_A.default",
+      "base_model.model.roberta.encoder.layer.6.attention.self.query.lora_B.default",
+      "base_model.model.roberta.encoder.layer.6.attention.self.query.lora_E.default",
+      "base_model.model.roberta.encoder.layer.6.attention.self.value.lora_A.default",
+      "base_model.model.roberta.encoder.layer.6.attention.self.value.lora_B.default",
+      "base_model.model.roberta.encoder.layer.6.attention.self.value.lora_E.default",
+      "base_model.model.roberta.encoder.layer.7.attention.self.query.lora_A.default",
+      "base_model.model.roberta.encoder.layer.7.attention.self.query.lora_B.default",
+      "base_model.model.roberta.encoder.layer.7.attention.self.query.lora_E.default",
+      "base_model.model.roberta.encoder.layer.7.attention.self.value.lora_A.default",
+      "base_model.model.roberta.encoder.layer.7.attention.self.value.lora_B.default",
+      "base_model.model.roberta.encoder.layer.7.attention.self.value.lora_E.default",
+      "base_model.model.roberta.encoder.layer.8.attention.self.query.lora_A.default",
+      "base_model.model.roberta.encoder.layer.8.attention.self.query.lora_B.default",
+      "base_model.model.roberta.encoder.layer.8.attention.self.query.lora_E.default",
+      "base_model.model.roberta.encoder.layer.8.attention.self.value.lora_A.default",
+      "base_model.model.roberta.encoder.layer.8.attention.self.value.lora_B.default",
+      "base_model.model.roberta.encoder.layer.8.attention.self.value.lora_E.default",
+      "base_model.model.roberta.encoder.layer.9.attention.self.query.lora_A.default",
+      "base_model.model.roberta.encoder.layer.9.attention.self.query.lora_B.default",
+      "base_model.model.roberta.encoder.layer.9.attention.self.query.lora_E.default",
+      "base_model.model.roberta.encoder.layer.9.attention.self.value.lora_A.default",
+      "base_model.model.roberta.encoder.layer.9.attention.self.value.lora_B.default",
+      "base_model.model.roberta.encoder.layer.9.attention.self.value.lora_E.default",
+      "base_model.model.roberta.encoder.layer.10.attention.self.query.lora_A.default",
+      "base_model.model.roberta.encoder.layer.10.attention.self.query.lora_B.default",
+      "base_model.model.roberta.encoder.layer.10.attention.self.query.lora_E.default",
+      "base_model.model.roberta.encoder.layer.10.attention.self.value.lora_A.default",
+      "base_model.model.roberta.encoder.layer.10.attention.self.value.lora_B.default",
+      "base_model.model.roberta.encoder.layer.10.attention.self.value.lora_E.default",
+      "base_model.model.roberta.encoder.layer.11.attention.self.query.lora_A.default",
+      "base_model.model.roberta.encoder.layer.11.attention.self.query.lora_B.default",
+      "base_model.model.roberta.encoder.layer.11.attention.self.query.lora_E.default",
+      "base_model.model.roberta.encoder.layer.11.attention.self.value.lora_A.default",
+      "base_model.model.roberta.encoder.layer.11.attention.self.value.lora_B.default",
+      "base_model.model.roberta.encoder.layer.11.attention.self.value.lora_E.default",
+      "base_model.model.classifier.modules_to_save.default.heads.S6.dense.weight",
+      "base_model.model.classifier.modules_to_save.default.heads.S6.dense.bias",
+      "base_model.model.classifier.modules_to_save.default.heads.S6.out_proj.weight",
+      "base_model.model.classifier.modules_to_save.default.heads.S6.out_proj.bias",
+      "base_model.model.classifier.modules_to_save.default.heads.S3.dense.weight",
+      "base_model.model.classifier.modules_to_save.default.heads.S3.dense.bias",
+      "base_model.model.classifier.modules_to_save.default.heads.S3.out_proj.weight",
+      "base_model.model.classifier.modules_to_save.default.heads.S3.out_proj.bias",
+      "base_model.model.classifier.modules_to_save.default.heads.S2.dense.weight",
+      "base_model.model.classifier.modules_to_save.default.heads.S2.dense.bias",
+      "base_model.model.classifier.modules_to_save.default.heads.S2.out_proj.weight",
+      "base_model.model.classifier.modules_to_save.default.heads.S2.out_proj.bias"
+    ]
+  },
+  "model_id": "Colorful/RTA",
+  "model_selection_freeze_id": "model-selection-v1",
+  "model_selection_freeze_sha256": "c25770e82e9104fc9c2ae3c57a7178bdb98b052590cbc4ea245cc1d24537f5e5",
+  "optimizer_scheduler": {
+    "adamw_lr": 0.0001,
+    "deltaT": 136,
+    "formula": "tinit=round(0.10*total_step); tfinal=round(0.20*total_step); deltaT=max(1,round(max(1,total_step-tinit-tfinal)/100))",
+    "tfinal": 3892,
+    "tinit": 1946,
+    "total_step": 19461,
+    "warmup_fraction": 0.06
+  },
+  "protocol_sha256": "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda",
+  "resolved_revision": "56cc614ee7cf17b8c1875e6848037f9e5bafc41a",
+  "runtime_seconds": 117941.11482633301,
+  "selected_family": "B4H_ADAPTED_RTA_LEXICAL_FUSION",
+  "semantic_dimension": 768,
+  "semantic_weight": 1.0,
+  "shared_transformer_training_runs": 1,
+  "stage": "FINAL_TRAINING_DEVELOPMENT_ONLY",
+  "status": "SUCCESS",
+  "task_artifacts": {
+    "S2": {
+      "c": 2.0,
+      "class_weight": "BALANCED",
+      "classifier": "LOGREG",
+      "classifier_artifact": "s2_classifier.pkl",
+      "final_fused_feature_count": 500768,
+      "fit_runtime_seconds": 2506.706161832961,
+      "lexical_feature_count": 500000,
+      "representation": "WORD_CHAR",
+      "representation_id": "S2-R3",
+      "vectorizer_artifact": "s2_vectorizer.pkl",
+      "warnings": []
+    },
+    "S3": {
+      "c": 2.0,
+      "class_weight": "BALANCED",
+      "classifier": "LOGREG",
+      "classifier_artifact": "s3_classifier.pkl",
+      "final_fused_feature_count": 250768,
+      "fit_runtime_seconds": 1119.4735445829574,
+      "lexical_feature_count": 250000,
+      "representation": "WORD",
+      "representation_id": "S3-R5",
+      "vectorizer_artifact": "s3_vectorizer.pkl",
+      "warnings": []
+    },
+    "S6": {
+      "c": 0.25,
+      "class_weight": "BALANCED",
+      "classifier": "LINEARSVC",
+      "classifier_artifact": "s6_classifier.pkl",
+      "final_fused_feature_count": 150768,
+      "fit_runtime_seconds": 8895.188813832996,
+      "lexical_feature_count": 150000,
+      "representation": "CHAR",
+      "representation_id": "S6-R3",
+      "vectorizer_artifact": "s6_vectorizer.pkl",
+      "warnings": []
+    }
+  },
+  "training": {
+    "class_weights": {
+      "S2": {
+        "HIGH_IMPACT": 1.682302782126942,
+        "LOWER_IMPACT": 0.3176972178730579
+      },
+      "S3": {
+        "HIGH": 0.8435993651103589,
+        "LOW": 1.9831742382563715,
+        "MEDIUM": 0.17322639663326939
+      },
+      "S6": {
+        "blocker": 2.147088738400213,
+        "critical": 0.8909318516113696,
+        "major": 0.32336920590732615,
+        "minor": 0.6809664717922764,
+        "normal": 0.04387080354904282,
+        "trivial": 1.9137729287397716
+      }
+    },
+    "effective_batch_size": 32,
+    "epoch_diagnostics": [
+      {
+        "epoch": 1,
+        "optimizer_steps_completed": 6487,
+        "s2_training_loss": 0.08180016431838748,
+        "s3_training_loss": 0.15810539069604418,
+        "s6_training_loss": 0.18969512037989153,
+        "total_training_loss": 0.14320022509293956,
+        "training_seconds": 30739.718799625
+      },
+      {
+        "epoch": 2,
+        "optimizer_steps_completed": 12974,
+        "s2_training_loss": 0.07668224999885491,
+        "s3_training_loss": 0.14178940617103689,
+        "s6_training_loss": 0.16426738796092866,
+        "total_training_loss": 0.12757968138951475,
+        "training_seconds": 30924.477739833004
+      },
+      {
+        "epoch": 3,
+        "optimizer_steps_completed": 19461,
+        "s2_training_loss": 0.07572490953513579,
+        "s3_training_loss": 0.1385971237558774,
+        "s6_training_loss": 0.15981800939933563,
+        "total_training_loss": 0.12471334760954852,
+        "training_seconds": 31059.398848250043
+      }
+    ],
+    "gradient_accumulation": 4,
+    "mps_current_allocated_bytes": 512254720,
+    "mps_driver_allocated_bytes": 8648507392,
+    "nan_inf_events": 0,
+    "optimizer_steps": 19461,
+    "optimizer_steps_per_second": 0.20987307301810218,
+    "peak_process_rss_bytes": 2507046912,
+    "process_rss_after_training_bytes": 269647872,
+    "process_rss_before_training_bytes": 147996672,
+    "selected_micro_batch": 8,
+    "tokenization_runtime_seconds": 79.08415254100692,
+    "training_runtime_seconds": 92727.47437362501,
+    "warmup_steps": 1168
+  }
+}
