@@ -1,0 +1,233 @@
+{
+  "artifact_count": 11,
+  "artifact_hashes_verified": true,
+  "development_membership_sha256": "4f62fdf4164594126c421955804b654cd5d5f8f7b46ada345ae0cffa71460d0f",
+  "development_rows": 207575,
+  "direct_head_metrics_calculated": false,
+  "direct_head_predictions_read": false,
+  "direct_heads_selected": false,
+  "embedding_diagnostics": {
+    "direct_head_metrics_calculated": false,
+    "direct_head_predictions_read": false,
+    "documents_per_second": 21.724846732496417,
+    "embedding_dimension": 768,
+    "inference_batch_size": 16,
+    "rows": 50675,
+    "runtime_seconds": 2332.5826241250033,
+    "tokens_per_second": 4506.015731786885
+  },
+  "environment": {
+    "device": "mps",
+    "dtype": "float32",
+    "packages": {
+      "accelerate": "1.14.0",
+      "numpy": "2.5.2",
+      "peft": "0.19.1",
+      "scikit-learn": "1.8.0",
+      "torch": "2.13.0",
+      "transformers": "5.14.1"
+    },
+    "platform": "macOS-26.6.1-arm64-arm-64bit",
+    "python": "3.12.13"
+  },
+  "evaluation_runner_tag": "final-evaluation-runner-v1",
+  "final_model_commit": "0f124923ac23234c6e9953f4434f9ad9b90584af",
+  "final_model_tag": "final-model-v1",
+  "git_head": "aeee2a4a1254c450640470be9fb895145259f3a6",
+  "git_tags_at_head": [
+    "final-evaluation-runner-v1"
+  ],
+  "git_worktree_clean": true,
+  "locked_test_accessed": true,
+  "locked_test_embedded": true,
+  "locked_test_membership_sha256": "c18f2320c896bf2bdcb94d2447ce9a04d17e6923f03b169f29b8174b8a5cf681",
+  "locked_test_model_performance_accessed": true,
+  "locked_test_rows": 50675,
+  "locked_test_tokenized": true,
+  "locked_test_used_for_tuning": false,
+  "metrics": {
+    "S2": {
+      "accuracy": 0.7969610261470153,
+      "balanced_accuracy": 0.7110201084055833,
+      "confusion_matrix": [
+        [
+          4367,
+          3040
+        ],
+        [
+          7249,
+          36019
+        ]
+      ],
+      "legacy_reproduction_guard": "PASS",
+      "legacy_reproduction_guard_reproduction_only": true,
+      "macro_f1": 0.6670755992593176,
+      "per_class": {
+        "HIGH_IMPACT": {
+          "f1": 0.4591284234873574,
+          "precision": 0.3759469696969697,
+          "recall": 0.5895774267584717,
+          "support": 7407
+        },
+        "LOWER_IMPACT": {
+          "f1": 0.8750227750312777,
+          "precision": 0.9221690263447605,
+          "recall": 0.8324627900526949,
+          "support": 43268
+        }
+      },
+      "pr_auc": 0.4250861101851651,
+      "roc_auc": 0.8049684660871195,
+      "weighted_f1": 0.8142328497843943
+    },
+    "S3": {
+      "accuracy": 0.6752047360631475,
+      "balanced_accuracy": 0.5595913887042822,
+      "confusion_matrix": [
+        [
+          4411,
+          2704,
+          292
+        ],
+        [
+          7073,
+          28926,
+          4935
+        ],
+        [
+          234,
+          1221,
+          879
+        ]
+      ],
+      "macro_f1": 0.48454556193109816,
+      "per_class": {
+        "HIGH": {
+          "f1": 0.461281045751634,
+          "precision": 0.3764294248165216,
+          "recall": 0.5955177534764412,
+          "support": 7407
+        },
+        "LOW": {
+          "f1": 0.20829383886255926,
+          "precision": 0.14395676383884703,
+          "recall": 0.37660668380462725,
+          "support": 2334
+        },
+        "MEDIUM": {
+          "f1": 0.7840618011791014,
+          "precision": 0.8805211409089525,
+          "recall": 0.706649728831778,
+          "support": 40934
+        }
+      },
+      "weighted_f1": 0.7103631434682369
+    },
+    "S6": {
+      "accuracy": 0.7116132215096201,
+      "balanced_accuracy": 0.32455016630846417,
+      "confusion_matrix": [
+        [
+          403,
+          275,
+          157,
+          401,
+          2,
+          1
+        ],
+        [
+          253,
+          459,
+          273,
+          745,
+          22,
+          7
+        ],
+        [
+          378,
+          654,
+          713,
+          2514,
+          115,
+          35
+        ],
+        [
+          1112,
+          1497,
+          1899,
+          34110,
+          1184,
+          1132
+        ],
+        [
+          16,
+          32,
+          60,
+          1225,
+          217,
+          108
+        ],
+        [
+          7,
+          31,
+          8,
+          399,
+          72,
+          159
+        ]
+      ],
+      "macro_f1": 0.29221921071187507,
+      "per_class": {
+        "blocker": {
+          "f1": 0.23650234741784038,
+          "precision": 0.18579990779160904,
+          "recall": 0.3252623083131558,
+          "support": 1239
+        },
+        "critical": {
+          "f1": 0.1950286806883365,
+          "precision": 0.1556987788331072,
+          "recall": 0.2609437180216032,
+          "support": 1759
+        },
+        "major": {
+          "f1": 0.18965287937225694,
+          "precision": 0.2292604501607717,
+          "recall": 0.16171467452937174,
+          "support": 4409
+        },
+        "minor": {
+          "f1": 0.1327217125382263,
+          "precision": 0.1346153846153846,
+          "recall": 0.13088057901085645,
+          "support": 1658
+        },
+        "normal": {
+          "f1": 0.8492680011951,
+          "precision": 0.8658678986647713,
+          "recall": 0.8332926173840817,
+          "support": 40934
+        },
+        "trivial": {
+          "f1": 0.1501416430594901,
+          "precision": 0.11026352288488211,
+          "recall": 0.23520710059171598,
+          "support": 676
+        }
+      },
+      "weighted_f1": 0.7214158088594098
+    }
+  },
+  "model_selection_freeze_id": "model-selection-v1",
+  "post_test_tuning_allowed": false,
+  "prediction_sha256": {
+    "S2": "5d75b05f2c27b0e1c6dc3257135e35b0381373336b40a3ac86f7e415353fe466",
+    "S3": "78cdffadf439790981a626f9ce807938455e5d93dbe712f5865a7d9a67e9fa5d",
+    "S6": "6a50ae2a6cdb1ef22f9520897ee8c49190e2bdf6f6830e38bc79d40368a668fb"
+  },
+  "protocol_sha256": "85faacae1e7f411d68803653388611c37c62730ea9217e9700a0ad6ac41b7cda",
+  "runtime_seconds": 2435.43337600003,
+  "selected_family": "B4H_ADAPTED_RTA_LEXICAL_FUSION",
+  "stage": "FINAL_LOCKED_EVALUATION",
+  "status": "SUCCESS"
+}
