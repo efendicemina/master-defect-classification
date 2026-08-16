@@ -17,6 +17,10 @@ from defect_classifier.classical_optimization import run_classical_optimization
 from defect_classifier.config import ConfigurationError, resolve_data_root
 from defect_classifier.cv_manifests import CvManifestError, materialize_frozen_cv_manifests
 from defect_classifier.dataset_audits import AuditError, run_audit
+from defect_classifier.final_evaluation import (
+    mark_final_evaluation_failed,
+    run_final_evaluation,
+)
 from defect_classifier.final_training import mark_final_training_failed, run_final_training
 from defect_classifier.lexical_semantic_fusion import run_fusion_benchmark
 from defect_classifier.long_text_embeddings import (
@@ -261,6 +265,27 @@ def build_parser() -> argparse.ArgumentParser:
         default=Path("data/processed/rta_adalora_multitask_v1"),
     )
     multitask.add_argument("--resume", action=argparse.BooleanOptionalAction, default=True)
+    final_eval = subparsers.add_parser(
+        "run-final-evaluation",
+        help="preflight or execute the one-shot frozen locked-test evaluation",
+    )
+    final_eval.add_argument("--protocol", type=Path, help="override protocol config")
+    final_eval.add_argument("--stage", choices=("preflight", "locked"), default="preflight")
+    final_eval.add_argument("--locked-dir", type=Path, default=Path("data/locked/protocol_v1"))
+    final_eval.add_argument(
+        "--artifact-root", type=Path, default=Path("data/processed/final_model_v1")
+    )
+    final_eval.add_argument(
+        "--final-manifest",
+        type=Path,
+        default=Path("reports/final_training_v1/final_training_manifest.json"),
+    )
+    final_eval.add_argument(
+        "--freeze-file",
+        type=Path,
+        default=Path("reports/model_selection_v1/model_selection_freeze.json"),
+    )
+    final_eval.add_argument("--report-dir", type=Path, default=Path("reports/final_evaluation_v1"))
     final_train = subparsers.add_parser(
         "train-final-model",
         help="fit the frozen selected B4-H pipeline once on full DEVELOPMENT only",
@@ -368,6 +393,31 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     print(f"Python: {platform.python_version()} ({sys.executable})")
     print(f"Platform: {platform.platform()}")
+    if args.command == "run-final-evaluation":
+        try:
+            result = run_final_evaluation(
+                stage=args.stage,
+                locked_dir=args.locked_dir.resolve(),
+                artifact_root=args.artifact_root.resolve(),
+                final_manifest_path=args.final_manifest.resolve(),
+                freeze_file=args.freeze_file.resolve(),
+                report_dir=args.report_dir.resolve(),
+                protocol=load_protocol(args.protocol),
+            )
+        except (
+            ProtocolError,
+            BenchmarkError,
+            OSError,
+            KeyError,
+            RuntimeError,
+            PermissionError,
+        ) as exc:
+            mark_final_evaluation_failed(args.report_dir.resolve(), exc)
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        print(f"Final evaluation stage: {result['stage']}")
+        print(f"Locked test accessed: {result['locked_test_accessed']}")
+        return 0
     if args.command == "train-final-model":
         try:
             result = run_final_training(
